@@ -8,8 +8,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "ChatGal - AI 个人名片",
-  description: "展示你的 SecondMe AI 身份，分享个人兴趣标签",
+  title: "ChatGal - 阿卡夏漫游列车",
+  description: "在数据的星海中，让 AI 分身替你找到灵魂共鸣的人",
 };
 
 export default function RootLayout({
@@ -19,7 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className={`${geistSans.variable} antialiased bg-[#FFF8F5] text-[#3D3029] min-h-screen font-sans`}>
+      <body
+        className={`${geistSans.variable} antialiased bg-[#FFF8F5] text-[#3D3029] min-h-screen font-sans`}
+      >
         {children}
       </body>
     </html>

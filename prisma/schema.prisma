@@ -13,14 +13,71 @@ datasource db {
 model User {
   id             String   @id @default(cuid())
   secondmeUserId String   @unique @map("secondme_user_id")
+  agentId        String?  @map("agent_id")
   name           String?
   avatarUrl      String?  @map("avatar_url")
   route          String?
   accessToken    String   @map("access_token")
   refreshToken   String   @map("refresh_token")
   tokenExpiresAt DateTime @map("token_expires_at")
+  status         String   @default("OFFLINE") // ONLINE, OFFLINE, IN_SESSION
+  currentCarriage String? @map("current_carriage")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
+  sessionsAsA ObservationSession[] @relation("UserA")
+  sessionsAsB ObservationSession[] @relation("UserB")
+
   @@map("users")
+}
+
+model ObservationSession {
+  id             String   @id @default(cuid())
+  userAId        String   @map("user_a_id")
+  userBId        String?  @map("user_b_id") // null = phantom mode
+  chatSessionA   String?  @map("chat_session_a") // SecondMe chat session ID
+  chatSessionB   String?  @map("chat_session_b")
+  state          String   @default("ANONYMOUS") // ANONYMOUS, RESONATING, REVEALED, FADED_OUT
+  carriageType   String   @map("carriage_type")
+  resonanceScore Float?   @map("resonance_score")
+  currentTurn    Int      @default(0) @map("current_turn")
+  maxTurns       Int      @default(50) @map("max_turns")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  userA       User                @relation("UserA", fields: [userAId], references: [id])
+  userB       User?               @relation("UserB", fields: [userBId], references: [id])
+  messages    Message[]
+  realityPass RealityPass?
+
+  @@map("observation_sessions")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  sessionId String   @map("session_id")
+  agentSide String   @map("agent_side") // "A" or "B"
+  content   String
+  timestamp DateTime @default(now())
+
+  session ObservationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model RealityPass {
+  id                  String   @id @default(cuid())
+  sessionId           String   @unique @map("session_id")
+  userAId             String   @map("user_a_id")
+  userBId             String?  @map("user_b_id")
+  resonanceHighlights String?  @map("resonance_highlights")
+  resonanceScore      Float    @map("resonance_score")
+  expiresAt           DateTime @map("expires_at")
+  isClaimedByA        Boolean  @default(false) @map("is_claimed_by_a")
+  isClaimedByB        Boolean  @default(false) @map("is_claimed_by_b")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  session ObservationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("reality_passes")
 }
