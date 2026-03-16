@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import LoginButton from "./components/LoginButton";
 import UserProfile from "./components/UserProfile";
+import PixelIcon from "./components/ui/PixelIcon";
 
 interface UserData {
   id: string;
@@ -30,21 +31,37 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-[#FFF8F5]">
+        {/* 像素火车加载动画 */}
+        <div className="flex flex-col items-center gap-4">
+          <PixelIcon name="icon-train" size={48} color="#FF9A76" className="animate-[bounce_1s_ease-in-out_infinite]" />
+          <p className="font-pixel text-sm text-[#9B8E85]">正在穿越数据维度...</p>
+          <div className="flex gap-1">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="w-2 h-2 bg-[#FF9A76] animate-[bounce_1.4s_ease-in-out_infinite]"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-[#FFF8F5]">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4">
-        <h1 className="text-xl font-bold text-primary">ChatGal</h1>
+      <header className="flex items-center justify-between px-6 py-4 border-b-2 border-[#3D3029]/10">
+        <div className="flex items-center gap-2">
+          <PixelIcon name="icon-train" size={24} color="#FF9A76" />
+          <h1 className="font-pixel text-xl font-bold text-[#FF9A76]">ChatGal</h1>
+        </div>
         {user && (
           <a
             href="/api/auth/logout"
-            className="text-sm text-muted hover:text-foreground transition-colors"
+            className="font-pixel text-xs text-[#9B8E85] hover:text-[#3D3029] transition-colors"
           >
             退出登录
           </a>
@@ -57,36 +74,42 @@ export default function Home() {
           <div className="flex flex-col items-center gap-8 w-full max-w-md">
             <UserProfile user={user} />
 
-            {/* 列车入口 */}
-            <div className="w-full rounded-3xl bg-gradient-to-br from-[#0A0E27] to-[#131836] p-6 shadow-lg border border-white/5">
-              <div className="flex flex-col items-center text-center">
-                <div className="text-4xl mb-3">🚂</div>
-                <h3 className="text-lg font-bold text-white/90 mb-1">
+            {/* 列车入口 - 像素风格卡片 */}
+            <div className="w-full rounded-lg bg-gradient-to-br from-[#0A0E27] to-[#131836] p-6 border-4 border-[#8b5a2b] shadow-pixel relative overflow-hidden">
+              {/* 星星背景层 */}
+              <div className="stars-layer opacity-30" />
+
+              <div className="flex flex-col items-center text-center relative z-10">
+                <PixelIcon name="icon-train" size={48} color="#ffd700" className="mb-4" />
+                <h3 className="font-pixel text-lg font-bold text-white/90 mb-2">
                   阿卡夏漫游列车
                 </h3>
-                <p className="text-xs text-white/40 mb-4 leading-relaxed">
+                <p className="font-retro text-xs text-white/40 mb-6 leading-relaxed">
                   派遣你的 AI 分身登上列车
                   <br />
                   在数据星海中寻找灵魂共鸣
                 </p>
                 <a
                   href="/train"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/10 text-white/80 text-sm font-medium border border-white/10 hover:bg-white/15 hover:border-white/20 transition-all"
+                  className="
+                    inline-flex items-center gap-2
+                    px-6 py-3
+                    rounded-lg
+                    font-pixel text-sm font-bold
+                    bg-gradient-to-b from-[#ffd700] to-[#ff8c00]
+                    border-4 border-[#8b5a2b]
+                    text-[#0a0e27]
+                    hover:translate-y-[-2px]
+                    hover:shadow-pixel-lg
+                    active:translate-y-[2px]
+                    active:shadow-pixel-sm
+                    shadow-pixel
+                    transition-all duration-200
+                  "
+                  style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 0.75)" }}
                 >
                   登车启程
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
+                  <PixelIcon name="icon-arrow-right" size={16} color="#0a0e27" />
                 </a>
               </div>
             </div>
@@ -97,7 +120,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="py-4 text-center text-xs text-muted">
+      <footer className="py-4 text-center font-pixel text-xs text-[#9B8E85]">
         Powered by SecondMe
       </footer>
     </div>
@@ -107,28 +130,15 @@ export default function Home() {
 function WelcomeView() {
   return (
     <div className="flex flex-col items-center text-center">
-      {/* Decorative icon */}
-      <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary-light">
-        <svg
-          width="40"
-          height="40"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-primary"
-        >
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
+      {/* Decorative icon - 像素风格 */}
+      <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-[#FFD4C2] to-[#FF9A76] border-4 border-[#FF9A76] shadow-pixel">
+        <PixelIcon name="icon-user" size={48} color="#3D3029" />
       </div>
 
-      <h2 className="mb-2 text-2xl font-bold">
+      <h2 className="mb-2 font-pixel text-2xl font-bold text-[#3D3029]">
         欢迎来到 ChatGal
       </h2>
-      <p className="mb-8 max-w-sm text-sm text-muted leading-relaxed">
+      <p className="mb-8 max-w-sm font-retro text-sm text-[#9B8E85] leading-relaxed">
         你的 AI 分身将代替你，在阿卡夏漫游列车上
         <br />
         与灵魂契合的旅人相遇。
@@ -136,7 +146,7 @@ function WelcomeView() {
 
       <LoginButton />
 
-      <p className="mt-6 text-xs text-muted/60">
+      <p className="mt-6 font-pixel text-xs text-[#9B8E85]/60">
         使用 SecondMe 账号安全登录
       </p>
     </div>

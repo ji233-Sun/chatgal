@@ -1,6 +1,80 @@
 @import "tailwindcss";
 
 @theme inline {
+  /* ===== ArcadeUI 基础色（继承） ===== */
+  --color-pixel-black: #1a1a1a;
+  --color-pixel-darkGray: #2c2c2c;
+  --color-pixel-gray: #4a4a4a;
+  --color-pixel-lightGray: #8a8a8a;
+  --color-pixel-white: #fafafa;
+
+  /* ArcadeUI 内置原色 */
+  --color-pixel-blue: #4169e1;
+  --color-pixel-darkBlue: #1e3c8c;
+  --color-pixel-red: #ff4757;
+  --color-pixel-darkRed: #c0392b;
+  --color-pixel-green: #2ecc71;
+  --color-pixel-darkGreen: #27ae60;
+
+  /* ArcadeUI 内置强调色 */
+  --color-pixel-yellow: #ffd32a;
+  --color-pixel-orange: #ff9f43;
+  --color-pixel-purple: #9b59b6;
+  --color-pixel-pink: #fd79a8;
+
+  /* ===== 阿卡夏漫游列车扩展色盘 ===== */
+  /* 深邃星空系 */
+  --color-akasha-black: #0a0e27;
+  --color-akasha-navy: #1a1f3a;
+  --color-akasha-purple: #2d1b4e;
+
+  /* 星光点缀系 */
+  --color-star-yellow: #ffd700;
+  --color-star-cyan: #00d9ff;
+  --color-star-pink: #ff6ec7;
+
+  /* 复古木质系 */
+  --color-wood-brown: #8b5a2b;
+  --color-wood-light: #c19a6b;
+  --color-brass-gold: #d4af37;
+
+  /* 功能色 */
+  --color-status-online: #4ade80;
+  --color-status-busy: #fbbf24;
+  --color-status-offline: #94a3b8;
+
+  /* 共鸣阶段色 */
+  --color-resonance-0: #64748b;
+  --color-resonance-25: #a78bfa;
+  --color-resonance-50: #f472b6;
+  --color-resonance-75: #fb923c;
+  --color-resonance-100: #fbbf24;
+
+  /* ===== 像素阴影系统 ===== */
+  --shadow-pixel: 4px 4px 0px 0px rgba(0, 0, 0, 0.75);
+  --shadow-pixel-sm: 2px 2px 0px 0px rgba(0, 0, 0, 0.75);
+  --shadow-pixel-lg: 6px 6px 0px 0px rgba(0, 0, 0, 0.75);
+  --shadow-pixel-xl: 8px 8px 0px 0px rgba(0, 0, 0, 0.75);
+  --shadow-pixel-inner: inset 3px 3px 0px 0px rgba(0, 0, 0, 0.75);
+
+  /* ===== 过渡动画 ===== */
+  --transition-pixel: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-pixel-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ===== 字体系统 ===== */
+  --font-pixel: var(--font-silkscreen), "Pixelated MS Sans Serif", "Monaco", monospace;
+  --font-retro: var(--font-share-tech-mono), "Roboto Mono", monospace;
+  --font-handwriting: var(--font-caveat), cursive;
+  --font-sans: var(--font-geist-sans);
+
+  /* ===== 间距系统 ===== */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* ===== 旧版兼容（逐步迁移） ===== */
   --color-background: #FFF8F5;
   --color-foreground: #3D3029;
   --color-primary: #FF9A76;
@@ -8,7 +82,6 @@
   --color-accent: #FFDAB9;
   --color-card: #FFFFFF;
   --color-muted: #9B8E85;
-  --font-sans: var(--font-geist-sans);
 }
 
 body {

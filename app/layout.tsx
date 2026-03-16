@@ -1,10 +1,31 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Silkscreen, Share_Tech_Mono, Caveat } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+const silkscreen = Silkscreen({
+  variable: "--font-silkscreen",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+});
+
+const shareTechMono = Share_Tech_Mono({
+  variable: "--font-share-tech-mono",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -20,7 +41,13 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body
-        className={`${geistSans.variable} antialiased bg-[#FFF8F5] text-[#3D3029] min-h-screen font-sans`}
+        className={`
+          ${geistSans.variable}
+          ${silkscreen.variable}
+          ${shareTechMono.variable}
+          ${caveat.variable}
+          antialiased bg-[#FFF8F5] text-[#3D3029] min-h-screen font-sans
+        `}
       >
         {children}
       </body>

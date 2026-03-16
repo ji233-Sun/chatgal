@@ -4,11 +4,13 @@
  * ConversationObserver - 核心观测界面
  * 用户作为"列车长"静默观看 Agent 对话
  * 特点：无输入框、自动推进、实时展示
+ * 像素风格设计
  */
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import StrangerAvatar from "./StrangerAvatar";
 import RevelationEffect from "./RevelationEffect";
+import PixelIcon from "../ui/PixelIcon";
 
 interface Message {
   id: string;
@@ -45,11 +47,11 @@ const CARRIAGE_NAMES: Record<string, string> = {
   gaming: "娱乐车厢",
 };
 
-const CARRIAGE_EMOJI: Record<string, string> = {
-  tech: "🔧",
-  art: "🎨",
-  philosophy: "🔭",
-  gaming: "🎮",
+const CARRIAGE_ICONS: Record<string, string> = {
+  tech: "icon-wrench",
+  art: "icon-food",
+  philosophy: "icon-scope",
+  gaming: "icon-game",
 };
 
 export default function ConversationObserver({
@@ -193,7 +195,7 @@ export default function ConversationObserver({
   }
 
   const carriageName = CARRIAGE_NAMES[session.carriageType] || session.carriageType;
-  const carriageEmoji = CARRIAGE_EMOJI[session.carriageType] || "🚃";
+  const carriageIcon = CARRIAGE_ICONS[session.carriageType] || "icon-train";
 
   return (
     <div className="flex flex-col h-full">
@@ -211,21 +213,22 @@ export default function ConversationObserver({
       />
 
       {/* 车厢头部 */}
-      <div className="px-4 py-3 border-b border-white/5">
+      <div className="px-4 py-3 border-b-2 border-white/5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg">{carriageEmoji}</span>
-            <span className="text-sm font-medium text-white/70">
+            <PixelIcon name={carriageIcon} size={20} color="#ffd700" />
+            <span className="font-pixel text-sm font-bold text-white/70">
               {carriageName}
             </span>
           </div>
-          <div className="flex items-center gap-3 text-xs text-white/30">
+          <div className="flex items-center gap-3 font-pixel text-xs text-white/30">
             <span>
               {session.currentTurn}/{session.maxTurns} 轮
             </span>
             {session.resonanceScore !== null && (
-              <span className="text-amber-400/60">
-                共鸣 {(session.resonanceScore * 100).toFixed(0)}%
+              <span className="text-amber-400/60 flex items-center gap-1">
+                <PixelIcon name="icon-star" size={12} color="currentColor" />
+                {(session.resonanceScore * 100).toFixed(0)}%
               </span>
             )}
           </div>
@@ -239,7 +242,7 @@ export default function ConversationObserver({
       >
         {/* 开场白 */}
         {messages.length === 0 && !isTyping && (
-          <div className="text-center py-12 text-white/20 text-sm">
+          <div className="text-center py-12 font-retro text-white/20 text-sm">
             列车缓缓驶入数据星海...
           </div>
         )}
@@ -255,8 +258,8 @@ export default function ConversationObserver({
             >
               {/* 头像 */}
               {isMyAgent ? (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500/30 to-blue-600/30 border border-cyan-500/20 flex items-center justify-center text-sm shrink-0">
-                  👤
+                <div className="w-8 h-8 rounded bg-gradient-to-br from-cyan-500/30 to-blue-600/30 border-2 border-cyan-500/20 flex items-center justify-center text-sm shrink-0">
+                  <PixelIcon name="icon-user" size={16} color="#00d9ff" />
                 </div>
               ) : (
                 <div className="shrink-0">
@@ -269,17 +272,22 @@ export default function ConversationObserver({
                 </div>
               )}
 
-              {/* 消息气泡 */}
+              {/* 消息气泡 - 像素风格 */}
               <div
-                className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                className={`max-w-[75%] px-4 py-2.5 rounded-lg border-2 text-sm leading-relaxed ${
                   isMyAgent
-                    ? "bg-cyan-500/10 text-white/80 rounded-tr-sm"
-                    : "bg-white/5 text-white/70 rounded-tl-sm"
+                    ? "bg-gradient-to-b from-[#fafafa] to-[#f0f0f0] border-[#1a1a1a] text-[#1a1a1a] rounded-tr-sm shadow-pixel-sm"
+                    : "bg-gradient-to-b from-[#e0e0e0] to-[#c0c0c0] border-[#4a4a4a] text-[#1a1a1a] rounded-tl-sm shadow-pixel-sm"
                 }`}
+                style={{
+                  boxShadow: isMyAgent
+                    ? "2px 2px 0px 0px rgba(0, 0, 0, 0.75)"
+                    : "2px 2px 0px 0px rgba(0, 0, 0, 0.5)",
+                }}
               >
                 {/* 身份标签 */}
                 <div
-                  className={`text-[10px] mb-1 ${
+                  className={`font-pixel text-[10px] mb-1 ${
                     isMyAgent ? "text-cyan-400/50" : "text-violet-400/50"
                   }`}
                 >
@@ -289,23 +297,23 @@ export default function ConversationObserver({
                       ? stranger.name
                       : `Passenger #${sessionId.slice(-4).toUpperCase()}`}
                 </div>
-                <p>{msg.content}</p>
+                <p className="font-retro">{msg.content}</p>
               </div>
             </div>
           );
         })}
 
-        {/* 打字指示器 */}
+        {/* 打字指示器 - 像素风格 */}
         {isTyping && (
           <div className="flex gap-3">
             <div className="shrink-0">
               <StrangerAvatar revealed={false} size="sm" />
             </div>
-            <div className="bg-white/5 px-4 py-3 rounded-2xl rounded-tl-sm">
+            <div className="bg-gradient-to-b from-[#e0e0e0] to-[#c0c0c0] border-2 border-[#4a4a4a] px-4 py-3 rounded-lg rounded-tl-sm shadow-pixel-sm">
               <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-white/30 rounded-full animate-[bounce_1.4s_ease-in-out_infinite]" />
-                <span className="w-1.5 h-1.5 bg-white/30 rounded-full animate-[bounce_1.4s_ease-in-out_0.2s_infinite]" />
-                <span className="w-1.5 h-1.5 bg-white/30 rounded-full animate-[bounce_1.4s_ease-in-out_0.4s_infinite]" />
+                <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_infinite]" />
+                <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_0.2s_infinite]" />
+                <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_0.4s_infinite]" />
               </div>
             </div>
           </div>
@@ -314,7 +322,7 @@ export default function ConversationObserver({
         {/* 和平散场 */}
         {session.state === "FADED_OUT" && (
           <div className="text-center py-8 space-y-3 animate-[fade-in_1s_ease-out]">
-            <div className="text-white/20 text-sm italic">
+            <div className="font-retro text-white/20 text-sm italic">
               Passenger #{sessionId.slice(-4).toUpperCase()} 站起身，整理了一下衣领
             </div>
             <div className="text-white/15 text-sm italic">
@@ -323,44 +331,52 @@ export default function ConversationObserver({
             <div className="text-white/10 text-sm italic">
               转身走向车厢连接处，消失在闪烁的星海中
             </div>
-            <div className="text-white/30 text-xs mt-6">
+            <div className="font-pixel text-white/30 text-xs mt-6">
               相忘于星海 — 对话已结束
             </div>
           </div>
         )}
 
-        {/* 揭面后的信息 */}
+        {/* 揭面后的信息 - 像素风格卡片 */}
         {revealComplete && session.state === "REVEALED" && stranger && (
-          <div className="mx-auto max-w-xs mt-6 p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 to-violet-500/10 border border-amber-500/20 text-center animate-[fade-in_1s_ease-out]">
-            <div className="text-amber-400 text-xs font-medium mb-2">
-              ✦ 共鸣唱片 ✦
-            </div>
-            <div className="text-white/80 text-sm font-medium">
-              {stranger.name || "神秘旅客"}
-            </div>
-            {session.resonanceScore !== null && (
-              <div className="text-amber-400/70 text-xs mt-1">
-                共鸣指数 {(session.resonanceScore * 100).toFixed(1)}%
+          <div className="mx-auto max-w-xs mt-6 p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-violet-500/10 border-4 border-amber-500/20 text-center animate-[fade-in_1s_ease-out] shadow-pixel relative overflow-hidden">
+            {/* 星星背景 */}
+            <div className="stars-layer opacity-20 absolute inset-0" />
+
+            <div className="relative z-10">
+              <div className="font-pixel text-amber-400 text-xs font-bold mb-2 flex items-center justify-center gap-1">
+                <PixelIcon name="icon-sparkle" size={12} color="#ffd700" />
+                共鸣唱片
+                <PixelIcon name="icon-sparkle" size={12} color="#ffd700" />
               </div>
-            )}
-            {stranger.route && (
-              <a
-                href={`https://second.me/${stranger.route}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block mt-3 px-4 py-1.5 rounded-full bg-amber-400/10 text-amber-400 text-xs hover:bg-amber-400/20 transition-colors"
-              >
-                申请连接 →
-              </a>
-            )}
+              <div className="text-white/80 font-pixel text-sm font-bold">
+                {stranger.name || "神秘旅客"}
+              </div>
+              {session.resonanceScore !== null && (
+                <div className="font-retro text-amber-400/70 text-xs mt-1">
+                  共鸣指数 {(session.resonanceScore * 100).toFixed(1)}%
+                </div>
+              )}
+              {stranger.route && (
+                <a
+                  href={`https://second.me/${stranger.route}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 mt-3 px-4 py-2 rounded-lg bg-amber-400/10 text-amber-400 font-pixel text-xs hover:bg-amber-400/20 transition-colors border-2 border-amber-400/20"
+                >
+                  申请连接
+                  <PixelIcon name="icon-arrow-right" size={12} color="currentColor" />
+                </a>
+              )}
+            </div>
           </div>
         )}
       </div>
 
       {/* 底部状态栏 - 绝对无输入框！ */}
-      <div className="px-4 py-3 border-t border-white/5 flex items-center justify-center">
-        <div className="flex items-center gap-2 text-xs text-white/25">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/50 animate-pulse" />
+      <div className="px-4 py-3 border-t-2 border-white/5 flex items-center justify-center">
+        <div className="flex items-center gap-2 font-pixel text-xs text-white/25">
+          <PixelIcon name="icon-eye" size={12} color="#00d9ff" className="animate-pulse" />
           <span>
             {session.state === "REVEALED"
               ? "共鸣已达成"

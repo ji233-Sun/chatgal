@@ -1,17 +1,53 @@
 "use client";
 
+import PixelIcon from "./ui/PixelIcon";
+
+/**
+ * LoginButton - 登录按钮
+ * 使用 ArcadeUI 风格 + 像素化设计
+ */
 export default function LoginButton() {
   return (
     <a
       href="/api/auth/login"
-      className="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3 text-sm font-medium text-white shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all"
+      className="
+        inline-flex items-center gap-3
+        px-8 py-4
+        rounded-lg
+        font-pixel text-sm font-bold
+        bg-gradient-to-b from-[#ffd700] to-[#ff8c00]
+        border-4 border-[#8b5a2b]
+        text-[#0a0e27]
+        cursor-pointer
+        transition-all duration-200
+        hover:translate-y-[-2px]
+        hover:shadow-pixel-lg
+        active:translate-y-[2px]
+        active:shadow-pixel-sm
+        shadow-pixel
+      "
+      style={{
+        boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 0.75)",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = "6px 6px 0px 0px rgba(0, 0, 0, 0.75)";
+        e.currentTarget.style.transform = "translateY(-2px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = "4px 4px 0px 0px rgba(0, 0, 0, 0.75)";
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
+      onMouseDown={(e) => {
+        e.currentTarget.style.boxShadow = "2px 2px 0px 0px rgba(0, 0, 0, 0.75)";
+        e.currentTarget.style.transform = "translateY(2px)";
+      }}
+      onMouseUp={(e) => {
+        e.currentTarget.style.boxShadow = "6px 6px 0px 0px rgba(0, 0, 0, 0.75)";
+        e.currentTarget.style.transform = "translateY(-2px)";
+      }}
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-        <polyline points="10 17 15 12 10 7" />
-        <line x1="15" y1="12" x2="3" y2="12" />
-      </svg>
-      使用 SecondMe 登录
+      <PixelIcon name="icon-train" size={18} color="#0a0e27" />
+      登车
     </a>
   );
 }
