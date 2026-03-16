@@ -160,3 +160,78 @@ body {
   0%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-4px); }
 }
+
+/* ===== 深色主题：ArcadeUI 组件覆盖 ===== */
+
+/*
+ * .train-theme 作用域下，ArcadeUI 组件默认亮色样式不适配深邃星空背景
+ * 此处统一覆盖 Card、Badge、ChatBubble、Button 在深色场景下的表现
+ */
+.train-theme {
+  /* Card 深色模式 */
+  & [class*="arcade-card"],
+  & .arcade-card {
+    --tw-bg-opacity: 1;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* Badge 深色适配 — 保持高对比度 */
+  & [class*="arcade-badge"] {
+    font-family: var(--font-pixel);
+  }
+
+  /* ChatBubble 深色模式 */
+  & .chat-bubble-sent {
+    background: linear-gradient(to bottom, #fafafa, #f0f0f0);
+    border-color: #1a1a1a;
+    color: #1a1a1a;
+  }
+
+  & .chat-bubble-received {
+    background: linear-gradient(to bottom, #e0e0e0, #c0c0c0);
+    border-color: #4a4a4a;
+    color: #1a1a1a;
+  }
+
+  /* 匿名状态气泡颜色 */
+  & .chat-bubble-anonymous {
+    border-color: rgba(139, 92, 246, 0.3);
+  }
+
+  /* 揭面状态气泡颜色 */
+  & .chat-bubble-revealed {
+    border-color: rgba(251, 191, 36, 0.3);
+  }
+}
+
+/* ===== 响应式容器工具类 ===== */
+.container-responsive {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-responsive {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .container-responsive {
+    max-width: 42rem; /* 672px */
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-responsive {
+    max-width: 56rem; /* 896px */
+  }
+}

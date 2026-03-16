@@ -3,7 +3,7 @@
 /**
  * /train - 列车站大厅
  * 选择车厢 → 启程
- * 像素风格设计
+ * 响应式：md 居中限宽, lg 更宽
  */
 
 import { useState } from "react";
@@ -63,15 +63,15 @@ export default function TrainStationPage() {
         </div>
       </header>
 
-      {/* Main */}
-      <main className="relative flex-1 flex flex-col items-center justify-center px-6 pb-20">
+      {/* Main — 响应式居中限宽 */}
+      <main className="relative flex-1 flex flex-col items-center justify-center px-6 pb-20 w-full max-w-md md:max-w-2xl lg:max-w-4xl mx-auto">
         {/* 标题 */}
         <div className="text-center mb-12">
           <PixelIcon name="icon-train" size={64} color="#ffd700" className="mb-6 animate-[bounce_2s_ease-in-out_infinite]" />
           <h1 className="font-pixel text-2xl font-bold text-white/90 mb-3">
             阿卡夏漫游列车
           </h1>
-          <p className="font-retro text-sm text-white/30 max-w-sm leading-relaxed">
+          <p className="font-retro text-sm text-white/30 max-w-sm mx-auto leading-relaxed">
             在数据的星海中，你的 AI 分身将代替你
             <br />
             与另一位神秘旅客展开一场未知的对话

@@ -4,10 +4,12 @@
  * ConversationObserver - 核心观测界面
  * 用户作为"列车长"静默观看 Agent 对话
  * 特点：无输入框、自动推进、实时展示
- * 像素风格设计
+ *
+ * 使用 ArcadeUI ChatBubble + Avatar + Card + Badge
  */
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import { ChatBubble, Avatar, Card, Badge } from "arcadeui";
 import StrangerAvatar from "./StrangerAvatar";
 import RevelationEffect from "./RevelationEffect";
 import PixelIcon from "../ui/PixelIcon";
@@ -214,7 +216,7 @@ export default function ConversationObserver({
 
       {/* 车厢头部 */}
       <div className="px-4 py-3 border-b-2 border-white/5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between max-w-full md:max-w-2xl lg:max-w-3xl mx-auto">
           <div className="flex items-center gap-2">
             <PixelIcon name={carriageIcon} size={20} color="#ffd700" />
             <span className="font-pixel text-sm font-bold text-white/70">
@@ -235,145 +237,161 @@ export default function ConversationObserver({
         </div>
       </div>
 
-      {/* 对话流 */}
+      {/* 对话流 — 响应式居中限宽 */}
       <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth"
       >
-        {/* 开场白 */}
-        {messages.length === 0 && !isTyping && (
-          <div className="text-center py-12 font-retro text-white/20 text-sm">
-            列车缓缓驶入数据星海...
-          </div>
-        )}
+        <div className="max-w-full md:max-w-2xl lg:max-w-3xl mx-auto space-y-4">
+          {/* 开场白 */}
+          {messages.length === 0 && !isTyping && (
+            <div className="text-center py-12 font-retro text-white/20 text-sm">
+              列车缓缓驶入数据星海...
+            </div>
+          )}
 
-        {messages.map((msg) => {
-          const isMyAgent = msg.agentSide === session.mySide;
-          return (
-            <div
-              key={msg.id}
-              className={`flex gap-3 animate-[fade-slide-up_0.4s_ease-out] ${
-                isMyAgent ? "flex-row-reverse" : ""
-              }`}
-            >
-              {/* 头像 */}
-              {isMyAgent ? (
-                <div className="w-8 h-8 rounded bg-gradient-to-br from-cyan-500/30 to-blue-600/30 border-2 border-cyan-500/20 flex items-center justify-center text-sm shrink-0">
-                  <PixelIcon name="icon-user" size={16} color="#00d9ff" />
-                </div>
-              ) : (
-                <div className="shrink-0">
-                  <StrangerAvatar
-                    revealed={revealComplete}
-                    avatarUrl={stranger?.avatarUrl}
-                    name={stranger?.name}
+          {messages.map((msg) => {
+            const isMyAgent = msg.agentSide === session.mySide;
+            const senderLabel = isMyAgent
+              ? "你的 Agent"
+              : revealComplete && stranger?.name
+                ? stranger.name
+                : `Passenger #${sessionId.slice(-4).toUpperCase()}`;
+
+            return (
+              <div
+                key={msg.id}
+                className={`flex gap-3 animate-[fade-slide-up_0.4s_ease-out] ${
+                  isMyAgent ? "flex-row-reverse" : ""
+                }`}
+              >
+                {/* 头像 */}
+                {isMyAgent ? (
+                  <Avatar
                     size="sm"
+                    shape="circle"
+                    fallback="AI"
+                    className="!bg-gradient-to-br !from-cyan-500/30 !to-blue-600/30 !border-2 !border-cyan-500/20 shrink-0"
+                  />
+                ) : (
+                  <div className="shrink-0">
+                    <StrangerAvatar
+                      revealed={revealComplete}
+                      avatarUrl={stranger?.avatarUrl}
+                      name={stranger?.name}
+                      size="sm"
+                    />
+                  </div>
+                )}
+
+                {/* 消息气泡 — ArcadeUI ChatBubble + 像素风覆盖 */}
+                <div className="max-w-[75%]">
+                  {/* 身份标签 */}
+                  <div
+                    className={`font-pixel text-[10px] mb-1 ${
+                      isMyAgent ? "text-cyan-400/50 text-right" : "text-violet-400/50"
+                    }`}
+                  >
+                    {senderLabel}
+                  </div>
+                  <ChatBubble
+                    message={msg.content}
+                    isSent={isMyAgent}
+                    timestamp={new Date(msg.timestamp).toLocaleTimeString("zh-CN", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    className={`
+                      !font-retro !text-sm !leading-relaxed
+                      ${isMyAgent
+                        ? "chat-bubble-sent !rounded-tr-sm"
+                        : "chat-bubble-received !rounded-tl-sm"
+                      }
+                      ${revealComplete ? "chat-bubble-revealed" : "chat-bubble-anonymous"}
+                    `}
                   />
                 </div>
-              )}
+              </div>
+            );
+          })}
 
-              {/* 消息气泡 - 像素风格 */}
-              <div
-                className={`max-w-[75%] px-4 py-2.5 rounded-lg border-2 text-sm leading-relaxed ${
-                  isMyAgent
-                    ? "bg-gradient-to-b from-[#fafafa] to-[#f0f0f0] border-[#1a1a1a] text-[#1a1a1a] rounded-tr-sm shadow-pixel-sm"
-                    : "bg-gradient-to-b from-[#e0e0e0] to-[#c0c0c0] border-[#4a4a4a] text-[#1a1a1a] rounded-tl-sm shadow-pixel-sm"
-                }`}
-                style={{
-                  boxShadow: isMyAgent
-                    ? "2px 2px 0px 0px rgba(0, 0, 0, 0.75)"
-                    : "2px 2px 0px 0px rgba(0, 0, 0, 0.5)",
-                }}
-              >
-                {/* 身份标签 */}
-                <div
-                  className={`font-pixel text-[10px] mb-1 ${
-                    isMyAgent ? "text-cyan-400/50" : "text-violet-400/50"
-                  }`}
-                >
-                  {isMyAgent
-                    ? "你的 Agent"
-                    : revealComplete && stranger?.name
-                      ? stranger.name
-                      : `Passenger #${sessionId.slice(-4).toUpperCase()}`}
+          {/* 打字指示器 */}
+          {isTyping && (
+            <div className="flex gap-3">
+              <div className="shrink-0">
+                <StrangerAvatar revealed={false} size="sm" />
+              </div>
+              <div className="bg-gradient-to-b from-[#e0e0e0] to-[#c0c0c0] border-2 border-[#4a4a4a] px-4 py-3 rounded-lg rounded-tl-sm shadow-pixel-sm">
+                <div className="flex gap-1">
+                  <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_infinite]" />
+                  <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_0.2s_infinite]" />
+                  <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_0.4s_infinite]" />
                 </div>
-                <p className="font-retro">{msg.content}</p>
               </div>
             </div>
-          );
-        })}
+          )}
 
-        {/* 打字指示器 - 像素风格 */}
-        {isTyping && (
-          <div className="flex gap-3">
-            <div className="shrink-0">
-              <StrangerAvatar revealed={false} size="sm" />
-            </div>
-            <div className="bg-gradient-to-b from-[#e0e0e0] to-[#c0c0c0] border-2 border-[#4a4a4a] px-4 py-3 rounded-lg rounded-tl-sm shadow-pixel-sm">
-              <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_infinite]" />
-                <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_0.2s_infinite]" />
-                <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_0.4s_infinite]" />
+          {/* 和平散场 */}
+          {session.state === "FADED_OUT" && (
+            <div className="text-center py-8 space-y-3 animate-[fade-in_1s_ease-out]">
+              <div className="font-retro text-white/20 text-sm italic">
+                Passenger #{sessionId.slice(-4).toUpperCase()} 站起身，整理了一下衣领
+              </div>
+              <div className="text-white/15 text-sm italic">
+                向你的 Agent 点了点头
+              </div>
+              <div className="text-white/10 text-sm italic">
+                转身走向车厢连接处，消失在闪烁的星海中
+              </div>
+              <div className="font-pixel text-white/30 text-xs mt-6">
+                相忘于星海 — 对话已结束
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* 和平散场 */}
-        {session.state === "FADED_OUT" && (
-          <div className="text-center py-8 space-y-3 animate-[fade-in_1s_ease-out]">
-            <div className="font-retro text-white/20 text-sm italic">
-              Passenger #{sessionId.slice(-4).toUpperCase()} 站起身，整理了一下衣领
-            </div>
-            <div className="text-white/15 text-sm italic">
-              向你的 Agent 点了点头
-            </div>
-            <div className="text-white/10 text-sm italic">
-              转身走向车厢连接处，消失在闪烁的星海中
-            </div>
-            <div className="font-pixel text-white/30 text-xs mt-6">
-              相忘于星海 — 对话已结束
-            </div>
-          </div>
-        )}
+          {/* 揭面后的信息 — ArcadeUI Card + Badge */}
+          {revealComplete && session.state === "REVEALED" && stranger && (
+            <Card
+              variant="outlined"
+              className="!mx-auto !max-w-xs !mt-6 !bg-gradient-to-br !from-amber-500/10 !to-violet-500/10 !border-amber-500/20 !text-center animate-[fade-in_1s_ease-out] !relative !overflow-hidden"
+            >
+              {/* 星星背景 */}
+              <div className="stars-layer opacity-20 absolute inset-0" />
 
-        {/* 揭面后的信息 - 像素风格卡片 */}
-        {revealComplete && session.state === "REVEALED" && stranger && (
-          <div className="mx-auto max-w-xs mt-6 p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-violet-500/10 border-4 border-amber-500/20 text-center animate-[fade-in_1s_ease-out] shadow-pixel relative overflow-hidden">
-            {/* 星星背景 */}
-            <div className="stars-layer opacity-20 absolute inset-0" />
-
-            <div className="relative z-10">
-              <div className="font-pixel text-amber-400 text-xs font-bold mb-2 flex items-center justify-center gap-1">
-                <PixelIcon name="icon-sparkle" size={12} color="#ffd700" />
-                共鸣唱片
-                <PixelIcon name="icon-sparkle" size={12} color="#ffd700" />
-              </div>
-              <div className="text-white/80 font-pixel text-sm font-bold">
-                {stranger.name || "神秘旅客"}
-              </div>
-              {session.resonanceScore !== null && (
-                <div className="font-retro text-amber-400/70 text-xs mt-1">
-                  共鸣指数 {(session.resonanceScore * 100).toFixed(1)}%
+              <div className="relative z-10 p-4">
+                <div className="font-pixel text-amber-400 text-xs font-bold mb-2 flex items-center justify-center gap-1">
+                  <PixelIcon name="icon-sparkle" size={12} color="#ffd700" />
+                  共鸣唱片
+                  <PixelIcon name="icon-sparkle" size={12} color="#ffd700" />
                 </div>
-              )}
-              {stranger.route && (
-                <a
-                  href={`https://second.me/${stranger.route}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 mt-3 px-4 py-2 rounded-lg bg-amber-400/10 text-amber-400 font-pixel text-xs hover:bg-amber-400/20 transition-colors border-2 border-amber-400/20"
-                >
-                  申请连接
-                  <PixelIcon name="icon-arrow-right" size={12} color="currentColor" />
-                </a>
-              )}
-            </div>
-          </div>
-        )}
+                <div className="text-white/80 font-pixel text-sm font-bold">
+                  {stranger.name || "神秘旅客"}
+                </div>
+                {session.resonanceScore !== null && (
+                  <div className="mt-1">
+                    <Badge variant="warning" size="sm">
+                      共鸣指数 {(session.resonanceScore * 100).toFixed(1)}%
+                    </Badge>
+                  </div>
+                )}
+                {stranger.route && (
+                  <a
+                    href={`https://second.me/${stranger.route}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 mt-3 px-4 py-2 rounded-lg bg-amber-400/10 text-amber-400 font-pixel text-xs hover:bg-amber-400/20 transition-colors border-2 border-amber-400/20"
+                  >
+                    申请连接
+                    <PixelIcon name="icon-arrow-right" size={12} color="currentColor" />
+                  </a>
+                )}
+              </div>
+            </Card>
+          )}
+        </div>
       </div>
 
-      {/* 底部状态栏 - 绝对无输入框！ */}
+      {/* 底部状态栏 — 绝对无输入框！ */}
       <div className="px-4 py-3 border-t-2 border-white/5 flex items-center justify-center">
         <div className="flex items-center gap-2 font-pixel text-xs text-white/25">
           <PixelIcon name="icon-eye" size={12} color="#00d9ff" className="animate-pulse" />

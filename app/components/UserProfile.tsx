@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Card, Avatar, Badge } from "arcadeui";
 
 interface UserProfileProps {
   user: {
@@ -38,22 +39,19 @@ export default function UserProfile({ user }: UserProfileProps) {
     : null;
 
   return (
-    <div className="flex w-full max-w-md flex-col items-center">
-      {/* Avatar Card */}
-      <div className="w-full rounded-3xl bg-card p-8 shadow-sm">
-        <div className="flex flex-col items-center">
+    <div className="flex w-full max-w-md flex-col items-center gap-6">
+      {/* 列车长信息卡片 */}
+      <Card variant="elevated" title="列车长信息" className="w-full">
+        <div className="flex flex-col items-center py-4">
           {/* Avatar */}
-          {user.avatarUrl ? (
-            <img
-              src={user.avatarUrl}
-              alt={user.name || "用户头像"}
-              className="h-24 w-24 rounded-full border-4 border-primary-light object-cover"
-            />
-          ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary-light text-3xl font-bold text-primary">
-              {(user.name || "U").charAt(0).toUpperCase()}
-            </div>
-          )}
+          <Avatar
+            size="xl"
+            shape="circle"
+            src={user.avatarUrl || undefined}
+            fallback={(user.name || "U").charAt(0).toUpperCase()}
+            alt={user.name || "用户头像"}
+            className="!border-4 !border-[#FFD4C2]"
+          />
 
           {/* Name */}
           <h2 className="mt-4 text-xl font-bold">
@@ -77,32 +75,30 @@ export default function UserProfile({ user }: UserProfileProps) {
             </a>
           )}
         </div>
-      </div>
+      </Card>
 
-      {/* Shades / Interest Tags */}
-      <div className="mt-6 w-full rounded-3xl bg-card p-6 shadow-sm">
-        <h3 className="mb-4 text-sm font-semibold text-muted">兴趣标签</h3>
-        {loadingShades ? (
-          <div className="flex justify-center py-4">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          </div>
-        ) : shades.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {shades.map((shade, index) => (
-              <span
-                key={index}
-                className="inline-block rounded-full bg-accent/50 px-4 py-1.5 text-sm font-medium text-foreground/80"
-              >
-                {shade.name || shade.label || "未知"}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <p className="py-2 text-center text-sm text-muted">
-            还没有兴趣标签
-          </p>
-        )}
-      </div>
+      {/* 兴趣标签卡片 */}
+      <Card variant="elevated" title="兴趣标签" className="w-full">
+        <div className="py-2">
+          {loadingShades ? (
+            <div className="flex justify-center py-4">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          ) : shades.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {shades.map((shade, index) => (
+                <Badge key={index} variant="warning" size="sm">
+                  {shade.name || shade.label || "未知"}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="py-2 text-center text-sm text-muted">
+              还没有兴趣标签
+            </p>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

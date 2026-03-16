@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "arcadeui";
 import LoginButton from "./components/LoginButton";
 import UserProfile from "./components/UserProfile";
 import PixelIcon from "./components/ui/PixelIcon";
@@ -68,49 +69,43 @@ export default function Home() {
         )}
       </header>
 
-      {/* Main */}
+      {/* Main — 响应式：md 居中限宽, lg 双栏 */}
       <main className="flex flex-1 flex-col items-center justify-center px-6 pb-20">
         {user ? (
-          <div className="flex flex-col items-center gap-8 w-full max-w-md">
-            <UserProfile user={user} />
+          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 w-full max-w-md md:max-w-2xl lg:max-w-4xl">
+            {/* 左栏：用户信息 */}
+            <div className="w-full lg:w-1/2 flex flex-col items-center">
+              <UserProfile user={user} />
+            </div>
 
-            {/* 列车入口 - 像素风格卡片 */}
-            <div className="w-full rounded-lg bg-gradient-to-br from-[#0A0E27] to-[#131836] p-6 border-4 border-[#8b5a2b] shadow-pixel relative overflow-hidden">
-              {/* 星星背景层 */}
-              <div className="stars-layer opacity-30" />
+            {/* 右栏：列车入口 */}
+            <div className="w-full lg:w-1/2 flex flex-col items-center">
+              <div className="w-full max-w-md rounded-lg bg-gradient-to-br from-[#0A0E27] to-[#131836] p-6 border-4 border-[#8b5a2b] shadow-pixel relative overflow-hidden">
+                {/* 星星背景层 */}
+                <div className="stars-layer opacity-30" />
 
-              <div className="flex flex-col items-center text-center relative z-10">
-                <PixelIcon name="icon-train" size={48} color="#ffd700" className="mb-4" />
-                <h3 className="font-pixel text-lg font-bold text-white/90 mb-2">
-                  阿卡夏漫游列车
-                </h3>
-                <p className="font-retro text-xs text-white/40 mb-6 leading-relaxed">
-                  派遣你的 AI 分身登上列车
-                  <br />
-                  在数据星海中寻找灵魂共鸣
-                </p>
-                <a
-                  href="/train"
-                  className="
-                    inline-flex items-center gap-2
-                    px-6 py-3
-                    rounded-lg
-                    font-pixel text-sm font-bold
-                    bg-gradient-to-b from-[#ffd700] to-[#ff8c00]
-                    border-4 border-[#8b5a2b]
-                    text-[#0a0e27]
-                    hover:translate-y-[-2px]
-                    hover:shadow-pixel-lg
-                    active:translate-y-[2px]
-                    active:shadow-pixel-sm
-                    shadow-pixel
-                    transition-all duration-200
-                  "
-                  style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 0.75)" }}
-                >
-                  登车启程
-                  <PixelIcon name="icon-arrow-right" size={16} color="#0a0e27" />
-                </a>
+                <div className="flex flex-col items-center text-center relative z-10">
+                  <PixelIcon name="icon-train" size={48} color="#ffd700" className="mb-4" />
+                  <h3 className="font-pixel text-lg font-bold text-white/90 mb-2">
+                    阿卡夏漫游列车
+                  </h3>
+                  <p className="font-retro text-xs text-white/40 mb-6 leading-relaxed">
+                    派遣你的 AI 分身登上列车
+                    <br />
+                    在数据星海中寻找灵魂共鸣
+                  </p>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="!bg-gradient-to-b !from-[#ffd700] !to-[#ff8c00] !border-[#8b5a2b] !text-[#0a0e27] !font-pixel !text-sm !font-bold !inline-flex !items-center !gap-2"
+                    onClick={() => {
+                      window.location.href = "/train";
+                    }}
+                  >
+                    登车启程
+                    <PixelIcon name="icon-arrow-right" size={16} color="#0a0e27" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -129,7 +124,7 @@ export default function Home() {
 
 function WelcomeView() {
   return (
-    <div className="flex flex-col items-center text-center">
+    <div className="flex flex-col items-center text-center max-w-md md:max-w-2xl">
       {/* Decorative icon - 像素风格 */}
       <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-[#FFD4C2] to-[#FF9A76] border-4 border-[#FF9A76] shadow-pixel">
         <PixelIcon name="icon-user" size={48} color="#3D3029" />

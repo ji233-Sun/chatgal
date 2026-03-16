@@ -2,8 +2,11 @@
 
 /**
  * StrangerAvatar - 神秘旅客的匿名头像
- * 揭面前显示全息剪影，揭面后显示真实头像
+ * 揭面前显示全息剪影（ArcadeUI Avatar + fallback），揭面后显示真实头像
+ * 保留自定义动画 class（glow-pulse、avatar-reveal）
  */
+
+import { Avatar } from "arcadeui";
 
 interface StrangerAvatarProps {
   revealed: boolean;
@@ -12,38 +15,44 @@ interface StrangerAvatarProps {
   size?: "sm" | "md" | "lg";
 }
 
+/** 映射到 ArcadeUI Avatar 的 size */
+const AVATAR_SIZE_MAP: Record<string, "sm" | "md" | "lg" | "xl"> = {
+  sm: "sm",
+  md: "md",
+  lg: "lg",
+};
+
 export default function StrangerAvatar({
   revealed,
   avatarUrl,
   name,
   size = "md",
 }: StrangerAvatarProps) {
-  const sizeClasses = {
-    sm: "w-8 h-8 text-sm",
-    md: "w-10 h-10 text-base",
-    lg: "w-16 h-16 text-2xl",
-  };
+  const arcadeSize = AVATAR_SIZE_MAP[size] || "md";
 
   if (revealed && avatarUrl) {
     return (
-      <img
+      <Avatar
         src={avatarUrl}
         alt={name || "旅客"}
-        className={`${sizeClasses[size]} rounded-full object-cover border-2 border-violet-400/50 animate-[avatar-reveal_1s_ease-out]`}
+        size={arcadeSize}
+        shape="circle"
+        className="!border-2 !border-violet-400/50 animate-[avatar-reveal_1s_ease-out]"
       />
     );
   }
 
+  // 匿名状态：ArcadeUI Avatar + 面具 fallback + glow 动画
   return (
-    <div
+    <Avatar
+      fallback="🎭"
+      size={arcadeSize}
+      shape="circle"
       className={`
-        ${sizeClasses[size]} rounded-full flex items-center justify-center
-        bg-gradient-to-br from-violet-600/30 to-cyan-600/30
-        border border-white/10 backdrop-blur-sm
+        !bg-gradient-to-br !from-violet-600/30 !to-cyan-600/30
+        !border !border-white/10
         ${!revealed ? "animate-[glow-pulse_3s_ease-in-out_infinite]" : ""}
       `}
-    >
-      <span className="opacity-70">🎭</span>
-    </div>
+    />
   );
 }

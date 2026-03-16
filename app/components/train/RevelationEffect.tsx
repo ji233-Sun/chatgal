@@ -3,13 +3,16 @@
 /**
  * RevelationEffect - 揭面特效覆盖层
  * 共鸣达成时播放的全屏动画
- * 像素风格设计
+ *
+ * 使用 ArcadeUI Avatar + Card + Badge
+ * 保留 4 阶段动画核心逻辑（glow → crack → reveal → done）
  *
  * 幻影模式下显示特殊文案（没有真实对手）
  * 真实匹配下显示对方头像和 SecondMe 链接
  */
 
 import { useEffect, useState, useCallback } from "react";
+import { Avatar, Card, Badge } from "arcadeui";
 import PixelIcon from "../ui/PixelIcon";
 
 interface RevelationEffectProps {
@@ -109,9 +112,9 @@ export default function RevelationEffect({
         </div>
       )}
 
-      {/* 揭面结果 - 像素风格卡片 */}
+      {/* 揭面结果 */}
       {(phase === "reveal" || phase === "done") && (
-        <div className="flex flex-col items-center gap-6 animate-[fade-in_1s_ease-out]">
+        <div className="flex flex-col items-center gap-6 animate-[fade-in_1s_ease-out] px-4">
           <div className="font-pixel text-amber-400 text-sm font-bold tracking-wider mb-2 flex items-center gap-2">
             <PixelIcon name="icon-sparkle" size={16} color="#ffd700" />
             共鸣达成
@@ -121,9 +124,12 @@ export default function RevelationEffect({
           {isPhantom ? (
             <>
               {/* 幻影模式 — 没有真实对手 */}
-              <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-amber-400/20 to-violet-500/20 border-4 border-amber-400/30 flex items-center justify-center shadow-pixel">
-                <PixelIcon name="icon-sparkle" size={40} color="#ffd700" />
-              </div>
+              <Avatar
+                fallback="✨"
+                size="xl"
+                shape="square"
+                className="!bg-gradient-to-br !from-amber-400/20 !to-violet-500/20 !border-4 !border-amber-400/30"
+              />
               <div className="text-center max-w-xs">
                 <h3 className="font-pixel text-lg font-bold text-white mb-2">
                   你的 Agent 展现了真实的自己
@@ -137,19 +143,15 @@ export default function RevelationEffect({
             </>
           ) : (
             <>
-              {/* 真实匹配 — 显示对方信息 */}
-              {stranger?.avatarUrl ? (
-                <img
-                  src={stranger.avatarUrl}
-                  alt={stranger.name || "旅客"}
-                  className="w-24 h-24 rounded-lg border-4 border-amber-400/50 object-cover shadow-pixel-lg animate-[avatar-reveal_1.5s_ease-out]"
-                  style={{ boxShadow: "6px 6px 0px 0px rgba(251, 191, 36, 0.2)" }}
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-amber-400/30 to-violet-500/30 border-4 border-amber-400/50 flex items-center justify-center shadow-pixel">
-                  <PixelIcon name="icon-user" size={40} color="#ffd700" />
-                </div>
-              )}
+              {/* 真实匹配 — ArcadeUI Avatar 显示对方信息 */}
+              <Avatar
+                src={stranger?.avatarUrl || undefined}
+                fallback={(stranger?.name || "旅").charAt(0)}
+                alt={stranger?.name || "旅客"}
+                size="xl"
+                shape="square"
+                className="!border-4 !border-amber-400/50 animate-[avatar-reveal_1.5s_ease-out]"
+              />
 
               <div className="text-center">
                 <h3 className="font-pixel text-xl font-bold text-white">
@@ -171,16 +173,23 @@ export default function RevelationEffect({
             </>
           )}
 
-          {/* 共鸣指数 - 像素风格卡片 */}
+          {/* 共鸣指数 — ArcadeUI Card + Badge */}
           {resonanceScore !== null && (
-            <div className="mt-2 px-6 py-3 rounded-lg bg-white/5 border-4 border-white/10 shadow-pixel">
-              <div className="font-pixel text-xs text-white/40 text-center mb-1">共鸣指数</div>
-              <div className="font-pixel text-2xl font-bold text-center text-amber-400 flex items-center justify-center gap-2">
-                <PixelIcon name="icon-star" size={20} color="#ffd700" />
-                {(resonanceScore * 100).toFixed(1)}%
-                <PixelIcon name="icon-star" size={20} color="#ffd700" />
+            <Card
+              variant="outlined"
+              className="!mt-2 !bg-white/5 !border-white/10"
+            >
+              <div className="px-6 py-3 text-center">
+                <div className="font-pixel text-xs text-white/40 mb-1">共鸣指数</div>
+                <div className="font-pixel text-2xl font-bold text-center text-amber-400 flex items-center justify-center gap-2">
+                  <PixelIcon name="icon-star" size={20} color="#ffd700" />
+                  <Badge variant="warning" size="lg">
+                    {(resonanceScore * 100).toFixed(1)}%
+                  </Badge>
+                  <PixelIcon name="icon-star" size={20} color="#ffd700" />
+                </div>
               </div>
-            </div>
+            </Card>
           )}
 
           {phase === "done" && (
