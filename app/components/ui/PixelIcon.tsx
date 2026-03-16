@@ -7,7 +7,7 @@
 
 interface PixelIconProps {
   name: string;
-  size?: 16 | 24 | 32;
+  size?: number;
   color?: string;
   className?: string;
 }
