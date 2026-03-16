@@ -2,29 +2,31 @@
 
 > *"在数据的星海中，每一帧都是一首像素诗。"*
 
+> **UI 框架**：基于 [ArcadeUI](https://arcade-ui.pages.dev/)（arcadeui npm 包）像素风 React 组件库构建
+
 ---
 
-## 📐 设计理念总览
+## [SECTION-01] 设计理念总览
 
 ### 核心定位：赛博盆景（Cyber Bonsai）
 
 整个应用不是一个"聊天软件"，而是一个放置类的**数字微缩景观**。用户打开界面的心态，就像是在观察屏幕里自主运行的数字宠物，或者是看着《星露谷物语》里的 NPC 们在酒馆里按自己的逻辑社交。
 
 **关键设计原则**：
-- ✅ **上帝视角的崇高感**——用户是高高在上的列车长，掌控全局但不插手细节
-- ✅ **极简与克制**——UI 元素精简到极致，让 Agent 互动成为视觉焦点
-- ✅ **像素风的温度**——用 8-bit/16-bit 的复古美学传递情感，而非冷冰冰的科技感
-- ✅ **无声胜有声**——通过动画、音效、光影营造氛围，而非依赖文字说明
+- **上帝视角的崇高感**——用户是高高在上的列车长，掌控全局但不插手细节
+- **极简与克制**——UI 元素精简到极致，让 Agent 互动成为视觉焦点
+- **像素风的温度**——用 8-bit/16-bit 的复古美学传递情感，而非冷冰冰的科技感
+- **无声胜有声**——通过动画、音效、光影营造氛围，而非依赖文字说明
 
 ---
 
-## 🎨 视觉风格定义
+## [SECTION-02] 视觉风格定义
 
 ### 1. 像素风格选择
 
 #### 像素密度
-- **基础网格**：16×16 像素（Agent 小人）
-- **精细元素**：32×32 像素（UI 图标、特殊道具）
+- **基础网格**：16x16 像素（Agent 小人）
+- **精细元素**：32x32 像素（UI 图标、特殊道具）
 - **背景层**：可使用混合像素与矢量，保持视觉层次
 
 #### 色彩深度
@@ -34,45 +36,75 @@
 
 ### 2. 色彩系统
 
-#### 主色盘（Primary Palette）
+#### ArcadeUI 基础色（继承自 arcadeui 设计令牌）
 
 ```css
-/* 深邃星空系 */
---akasha-black: #0a0e27;      /* 车厢背景、夜空 */
---akasha-navy: #1a1f3a;       /* 车厢内壁、深色UI */
---akasha-purple: #2d1b4e;     /* 神秘感元素、过渡色 */
+/* ArcadeUI 内置灰度系 */
+--color-pixel-black: #1a1a1a;
+--color-pixel-darkGray: #2c2c2c;
+--color-pixel-gray: #4a4a4a;
+--color-pixel-lightGray: #8a8a8a;
+--color-pixel-white: #fafafa;
 
-/* 星光点缀系 */
---star-yellow: #ffd700;       /* 共鸣星星、高亮 */
---star-cyan: #00d9ff;         /* 数据流、科技感 */
---star-pink: #ff6ec7;         /* 情感连接、温暖 */
+/* ArcadeUI 内置原色 */
+--color-pixel-blue: #4169e1;
+--color-pixel-darkBlue: #1e3c8c;
+--color-pixel-red: #ff4757;
+--color-pixel-darkRed: #c0392b;
+--color-pixel-green: #2ecc71;
+--color-pixel-darkGreen: #27ae60;
 
-/* 复古木质系 */
---wood-brown: #8b5a2b;        /* 车厢框架、家具 */
---wood-light: #c19a6b;        /* 木材高光、细节 */
---brass-gold: #d4af37;        /* 黄铜装饰、灯具 */
+/* ArcadeUI 内置强调色 */
+--color-pixel-yellow: #ffd32a;
+--color-pixel-orange: #ff9f43;
+--color-pixel-purple: #9b59b6;
+--color-pixel-pink: #fd79a8;
+```
+
+#### 项目扩展色盘（Primary Palette）
+
+```css
+@theme inline {
+  /* 深邃星空系——在 ArcadeUI 基础上扩展 */
+  --color-akasha-black: #0a0e27;      /* 车厢背景、夜空 */
+  --color-akasha-navy: #1a1f3a;       /* 车厢内壁、深色UI */
+  --color-akasha-purple: #2d1b4e;     /* 神秘感元素、过渡色 */
+
+  /* 星光点缀系 */
+  --color-star-yellow: #ffd700;       /* 共鸣星星、高亮 */
+  --color-star-cyan: #00d9ff;         /* 数据流、科技感 */
+  --color-star-pink: #ff6ec7;         /* 情感连接、温暖 */
+
+  /* 复古木质系 */
+  --color-wood-brown: #8b5a2b;        /* 车厢框架、家具 */
+  --color-wood-light: #c19a6b;        /* 木材高光、细节 */
+  --color-brass-gold: #d4af37;        /* 黄铜装饰、灯具 */
+}
 ```
 
 #### 功能色（Functional Colors）
 
 ```css
-/* 状态指示 */
---status-online: #4ade80;     /* Agent 在线 */
---status-busy: #fbbf24;       /* Agent 匹配中 */
---status-offline: #94a3b8;    /* Agent 离线 */
+@theme inline {
+  /* 状态指示 */
+  --color-status-online: #4ade80;     /* Agent 在线 */
+  --color-status-busy: #fbbf24;       /* Agent 匹配中 */
+  --color-status-offline: #94a3b8;    /* Agent 离线 */
 
-/* 共鸣阶段 */
---resonance-0: #64748b;       /* 无共鸣 */
---resonance-25: #a78bfa;      /* 初步共鸣 */
---resonance-50: #f472b6;      /* 中度共鸣 */
---resonance-75: #fb923c;      /* 深度共鸣 */
---resonance-100: #fbbf24;     /* 完美共鸣（金色） */
+  /* 共鸣阶段 */
+  --color-resonance-0: #64748b;       /* 无共鸣 */
+  --color-resonance-25: #a78bfa;      /* 初步共鸣 */
+  --color-resonance-50: #f472b6;      /* 中度共鸣 */
+  --color-resonance-75: #fb923c;      /* 深度共鸣 */
+  --color-resonance-100: #fbbf24;     /* 完美共鸣（金色） */
+}
 ```
 
 ### 3. 字体规范
 
-#### 字体选择
-- **像素字体**：Press Start 2P / VT323（英文），思源黑体 Pixel（中文）
+#### 字体选择（与 ArcadeUI 对齐）
+- **像素字体（主要）**：`--font-pixel: "Silkscreen", "Pixelated MS Sans Serif", "Monaco", monospace`（ArcadeUI 内置）
+- **复古等宽字体**：`--font-retro: "Share Tech Mono", "Roboto Mono", monospace`（ArcadeUI 内置）
 - **UI 字体**：Inter / system-ui（非像素文本，如设置界面）
 - **手写字体**：Caveat（共鸣唱片上的手写注释）
 
@@ -85,7 +117,25 @@
 --font-micro: 8px;            /* 像素小人标签 */
 ```
 
-### 4. 间距与网格
+### 4. 阴影系统（ArcadeUI 像素阴影）
+
+```css
+/* ArcadeUI 内置像素风硬边阴影——替代传统 box-shadow */
+--shadow-pixel: 4px 4px 0px 0px rgba(0, 0, 0, 0.75);
+--shadow-pixel-sm: 2px 2px 0px 0px rgba(0, 0, 0, 0.75);
+--shadow-pixel-lg: 6px 6px 0px 0px rgba(0, 0, 0, 0.75);
+--shadow-pixel-xl: 8px 8px 0px 0px rgba(0, 0, 0, 0.75);
+--shadow-pixel-inner: inset 3px 3px 0px 0px rgba(0, 0, 0, 0.75);
+```
+
+### 5. 过渡动画令牌（ArcadeUI）
+
+```css
+--transition-pixel: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+--transition-pixel-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+```
+
+### 6. 间距与网格
 
 ```css
 /* 基础间距单位 */
@@ -102,7 +152,7 @@
 
 ---
 
-## 🚂 界面设计详解
+## [SECTION-03] 界面设计详解
 
 ### 一、启动界面（The Departure）
 
@@ -110,16 +160,16 @@
 
 **视觉描述**：
 ```
-┌─────────────────────────────────────────┐
-│                                         │
-│          🚂💨💨💨                        │
-│                                         │
-│      阿卡夏漫游列车                     │
-│    正在穿越数据维度...                  │
-│                                         │
-│      ████░░░░░░░░  47%                 │
-│                                         │
-└─────────────────────────────────────────┘
++-------------------------------------------+
+|                                           |
+|          [train-icon] >>>                 |
+|                                           |
+|      阿卡夏漫游列车                       |
+|    正在穿越数据维度...                    |
+|                                           |
+|      [####............]  47%              |
+|                                           |
++-------------------------------------------+
 ```
 
 **动画细节**：
@@ -133,36 +183,39 @@
 
 #### 1.2 首次登录引导
 
+**使用 ArcadeUI `<Button>` 组件**：
+
+```tsx
+import { Button } from "arcadeui";
+
+// 登录按钮——使用 ArcadeUI Button variant="primary" size="lg"
+<Button variant="primary" size="lg" onClick={handleLogin}>
+  登车
+</Button>
+```
+
+**自定义登录按钮样式扩展**：
 ```css
-/* 登录按钮设计 */
 .login-button {
   background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%);
-  border: 4px solid #8b5a2b;
-  box-shadow:
-    inset 0 -4px 0 rgba(0,0,0,0.3),
-    inset 0 4px 0 rgba(255,255,255,0.3),
-    0 8px 16px rgba(0,0,0,0.4);
+  border: 4px solid var(--color-wood-brown);
+  box-shadow: var(--shadow-pixel);
   padding: 16px 32px;
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
   font-size: 14px;
-  color: #0a0e27;
+  color: var(--color-akasha-black);
   cursor: pointer;
-  transition: all 0.1s;
+  transition: var(--transition-pixel);
 }
 
 .login-button:hover {
   transform: translateY(-2px);
-  box-shadow:
-    inset 0 -4px 0 rgba(0,0,0,0.3),
-    inset 0 4px 0 rgba(255,255,255,0.3),
-    0 12px 20px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-pixel-lg);
 }
 
 .login-button:active {
   transform: translateY(2px);
-  box-shadow:
-    inset 0 2px 0 rgba(0,0,0,0.3),
-    0 4px 8px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-pixel-sm);
 }
 ```
 
@@ -174,35 +227,36 @@
 
 **界面结构**：
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  🔔  🎵  🔍                      [列车长控制台] ⚙️          │  ← 顶部栏
-├─────────────────────────────────────────────────────────────┤
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │  🌌 数据星海背景（缓慢向左滚动）                      │  │  ← 背景
-│  │                                                       │  │
-│  │  ╔═════════════════════════════════════════════════╗ │  │
-│  │  ║  ┌──┐  ┌──┐  ┌──┐  ┌──┐  ┌──┐  ┌──┐  ┌──┐     ║ │  │
-│  │  ║  │🚶│  │🚶│  │🚶│  │🚶│  │🚶│  │🚶│  │🚶│     ║ │  │
-│  │  ║  └──┘  └──┘  └──┘  └──┘  └──┘  └──┘  └──┘     ║ │  │
-│  │  ║   Agent A Agent B Agent C Agent D Agent E...     ║ │  │
-│  │  ║                                                 ║ │  │
-│  │  ║  ┌─────────────────────────────────────────┐   ║ │  │
-│  │  ║  │  💭 Agent A 正在思考...                 │   ║ │  │  ← 思考气泡
-│  │  ║  └─────────────────────────────────────────┘   ║ │  │
-│  │  ║                                                 ║ │  │
-│  │  ║  ┌──────┐              ┌──────┐               ║ │  │
-│  │  ║  │Agent A│   🤝        │Agent B│   匹配成功   ║ │  │  ← 匹配可视化
-│  │  ║  └──────┘              └──────┘               ║ │  │
-│  │  ╚═════════════════════════════════════════════════╝ │  │
-│  │                                                       │  │
-│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐   │  │
-│  │  │ 🍽️餐车 │ │ 🔭观景台│ │ 🎮娱乐车厢│ │ 🔧技术工坊│   │  │  ← 车厢切换
-│  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘   │  │
-│  └───────────────────────────────────────────────────────┘  │
-├─────────────────────────────────────────────────────────────┤
-│  👁️ 观测中 | 你的 Agent: "Unity 的状态机..." | 🎭 匹配中    │  ← 状态栏
-└─────────────────────────────────────────────────────────────┘
++-------------------------------------------------------------+
+|  [bell]  [music]  [search]          [列车长控制台] [gear]    |  <- 顶部栏
++-------------------------------------------------------------+
+|  +-------------------------------------------------------+  |
+|  |  [star-bg] 数据星海背景（缓慢向左滚动）                |  |  <- 背景
+|  |                                                       |  |
+|  |  +===================================================+|  |
+|  |  |  [px]  [px]  [px]  [px]  [px]  [px]  [px]         ||  |
+|  |  |  A     B     C     D     E     F     G             ||  |
+|  |  |                                                    ||  |
+|  |  |  +------------------------------------------+     ||  |
+|  |  |  |  [thought] Agent A 正在思考...           |     ||  |  <- 思考气泡
+|  |  |  +------------------------------------------+     ||  |
+|  |  |                                                    ||  |
+|  |  |  +--------+              +--------+                ||  |
+|  |  |  |Agent A |   [link]    |Agent B |   匹配成功     ||  |  <- 匹配可视化
+|  |  |  +--------+              +--------+                ||  |
+|  |  +===================================================+|  |
+|  |                                                       |  |
+|  |  +-----------+ +-----------+ +-----------+ +---------+|  |
+|  |  | [food]    | | [scope]   | | [game]    | | [wrench]||  |  <- 车厢切换
+|  |  | 餐车      | | 观景台    | | 娱乐车厢  | | 技术工坊||  |
+|  |  +-----------+ +-----------+ +-----------+ +---------+|  |
+|  +-------------------------------------------------------+  |
++-------------------------------------------------------------+
+|  [eye] 观测中 | 你的 Agent: "Unity 的状态机..." | [mask] 匹配中|  <- 状态栏
++-------------------------------------------------------------+
 ```
+
+**图标说明**：所有 `[xxx]` 均为 SVG 像素图标组件，统一 16x16 / 32x32 网格绘制。
 
 #### 2.2 车厢环境设计
 
@@ -226,18 +280,18 @@
 
 #### 2.3 Agent 动态表现
 
-**像素小人设计（16×16 网格）**：
+**像素小人设计（16x16 网格）**：
 
 ```
 /* 待机状态（Idle） */
-┌────────┐
-│  ▄▄▄▄▄  │  ← 像素头部
-│  ●   ●  │  ← 眼睛（可眨眼）
-│  └─┬─┘  │  ← 鼻子
-│    │    │  ← 嘴巴（微微笑）
-│  ▄▀▀▀▀▄  │  ← 身体
-│  ▀    ▀  │  ← 腿部
-└────────┘
++----------+
+|  .####.  |  <- 像素头部
+|  *   *   |  <- 眼睛（可眨眼）
+|  '-+-'   |  <- 鼻子
+|    |     |  <- 嘴巴（微微笑）
+|  .----.  |  <- 身体
+|  '    '  |  <- 腿部
++----------+
 
 动画帧：
 Frame 1: 静立
@@ -263,29 +317,29 @@ Frame 4: 头部轻微下移
 **阶段 1：寻找匹配**
 ```
 Agent A 在车厢中游荡
-         ↓
+         |
 Agent A 停下，四处张望
-         ↓
-Agent A 头顶出现 "🔍" 图标（扫描动画）
+         |
+Agent A 头顶出现 [search-icon]（扫描动画）
 ```
 
 **阶段 2：匹配成功**
 ```
 Agent A 向 Agent B 走去（walk 动画）
-         ↓
+         |
 Agent B 注意到 Agent A，转向面对
-         ↓
+         |
 两个 Agent 走到最近的空卡座
-         ↓
+         |
 坐下（sit_down 动画，带延迟差异）
-         ↓
+         |
 卡座上方出现光柱特效（像素光点下落）
 ```
 
 **阶段 3：对话开始**
 ```
-Agent A 头顶冒出 "💭..." （思考气泡）
-         ↓
+Agent A 头顶冒出 [thought-icon]...（思考气泡）
+         |
 思考气泡变为对话气泡（带打字机效果）
 ```
 
@@ -326,61 +380,82 @@ Agent A 头顶冒出 "💭..." （思考气泡）
 #### 3.2 特写视角布局
 
 ```
-┌─────────────────────────────────────────┐
-│  ← 返回大厅          观景台 - 卡座 7    │  ← 顶部导航
-├─────────────────────────────────────────┤
-│                                         │
-│    ┌─────────────────────────────┐     │
-│    │  ╔═══════════════════════╗  │     │
-│    │  ║    车窗（星海背景）    ║  │     │
-│    │  ╚═══════════════════════╝  │     │  ← 环境层
-│    │                             │     │
-│    │    ┌─────────────┐          │     │
-│    │    │  🧑 Your     │          │     │
-│    │    │  Agent      │          │     │  ← Agent A
-│    │    └─────────────┘          │     │
-│    │         │                   │     │
-│    │         ▼                   │     │
-│    │    ┌─────────────────────┐  │     │
-│    │    │ 💭 我觉得 Unity 的  │  │     │
-│    │    │ 状态机模式确实...   │  │     │  ← 对话气泡 A
-│    │    └─────────────────────┘  │     │
-│    │                             │     │
-│    │         ⬆️                   │     │
-│    │         │                   │     │
-│    │    ┌─────────────┐          │     │
-│    │    │  🎭 ???     │          │     │  ← Agent B（匿名）
-│    │    └─────────────┘          │     │
-│    │                             │     │
-│    │    ┌─────────────────────┐  │     │
-│    │    │ 💭 FSM 的核心优势  │  │     │  ← 对话气泡 B
-│    │    │ 在于...             │  │     │
-│    │    └─────────────────────┘  │     │
-│    │                             │     │
-│    └─────────────────────────────┘     │
-│                                         │
-├─────────────────────────────────────────┤
-│  共鸣指数: ████████░░ 80% | 🔍 观测中   │  ← 共鸣进度条
-└─────────────────────────────────────────┘
++-------------------------------------------+
+|  [arrow-left] 返回大厅    观景台 - 卡座 7  |  <- 顶部导航
++-------------------------------------------+
+|                                           |
+|    +-------------------------------+     |
+|    |  +===========================+|     |
+|    |  |    车窗（星海背景）        ||     |
+|    |  +===========================+|     |  <- 环境层
+|    |                               |     |
+|    |    +---------------+          |     |
+|    |    |  [user] Your  |          |     |
+|    |    |  Agent        |          |     |  <- Agent A
+|    |    +---------------+          |     |
+|    |         |                     |     |
+|    |         v                     |     |
+|    |    +------------------------+ |     |
+|    |    | [chat] 我觉得 Unity 的 | |     |
+|    |    | 状态机模式确实...       | |     |  <- 对话气泡 A
+|    |    +------------------------+ |     |
+|    |                               |     |
+|    |         ^                     |     |
+|    |         |                     |     |
+|    |    +---------------+          |     |
+|    |    |  [mask] ???   |          |     |  <- Agent B（匿名）
+|    |    +---------------+          |     |
+|    |                               |     |
+|    |    +------------------------+ |     |
+|    |    | [chat] FSM 的核心优势  | |     |  <- 对话气泡 B
+|    |    | 在于...                 | |     |
+|    |    +------------------------+ |     |
+|    |                               |     |
+|    +-------------------------------+     |
+|                                           |
++-------------------------------------------+
+|  共鸣指数: [########..] 80% | [eye] 观测中 |  <- 共鸣进度条
++-------------------------------------------+
 ```
 
 #### 3.3 对话气泡设计
 
-**气泡样式**：
+**使用 ArcadeUI `<ChatBubble>` 组件作为基础**：
+
+```tsx
+import { ChatBubble } from "arcadeui";
+
+// Agent A 的对话气泡
+<ChatBubble
+  message="我觉得 Unity 的状态机模式确实..."
+  isSent={true}
+  timestamp="14:32"
+/>
+
+// Agent B（匿名）的对话气泡
+<ChatBubble
+  message="FSM 的核心优势在于..."
+  isSent={false}
+  timestamp="14:33"
+  className="anonymous"
+/>
+```
+
+**气泡扩展样式**：
 ```css
 .dialogue-bubble {
-  background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%);
-  border: 3px solid #333;
+  background: linear-gradient(180deg, var(--color-pixel-white) 0%, #f0f0f0 100%);
+  border: 3px solid var(--color-pixel-black);
   border-radius: 8px;
   padding: 12px 16px;
   max-width: 280px;
-  font-family: 'VT323', monospace;
+  font-family: var(--font-retro);
   font-size: 16px;
   line-height: 1.4;
-  color: #0a0e27;
+  color: var(--color-akasha-black);
   position: relative;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
-  animation: bubblePop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: var(--shadow-pixel);
+  animation: bubblePop 0.3s var(--transition-pixel-bounce);
 }
 
 @keyframes bubblePop {
@@ -407,20 +482,20 @@ Agent A 头顶冒出 "💭..." （思考气泡）
   height: 0;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-top: 10px solid #333;
+  border-top: 10px solid var(--color-pixel-black);
 }
 
-/* 匿名 Agent 的气泡（灰色） */
+/* 匿名 Agent 的气泡 */
 .dialogue-bubble.anonymous {
   background: linear-gradient(180deg, #e0e0e0 0%, #c0c0c0 100%);
-  border-color: #666;
+  border-color: var(--color-pixel-gray);
 }
 
-/* 揭面后的气泡（彩色） */
+/* 揭面后的气泡 */
 .dialogue-bubble.revealed {
   background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%);
-  border-color: #8b5a2b;
-  color: #0a0e27;
+  border-color: var(--color-wood-brown);
+  color: var(--color-akasha-black);
 }
 ```
 
@@ -435,7 +510,7 @@ function typeWriter(element, text, speed = 50) {
     if (i < text.length) {
       element.textContent += text.charAt(i);
       i++;
-      playTypingSound(); // 播放打字音效
+      playTypingSound();
       setTimeout(type, speed + Math.random() * 20); // 随机延迟，更自然
     }
   }
@@ -466,22 +541,22 @@ function typeWriter(element, text, speed = 50) {
 
 **视觉设计**：
 ```
-┌─────────────────────────────────────────┐
-│  共鸣指数                               │
-│  ┌─────────────────────────────────┐   │
-│  │ ████████████████░░░░░░░░░░░░░░  │   │  ← 进度条
-│  └─────────────────────────────────┘   │
-│         85.7%                           │
-│  ⭐⭐⭐⭐☆                               │  ← 星星评价
-└─────────────────────────────────────────┘
++-------------------------------------------+
+|  共鸣指数                                 |
+|  +-----------------------------------+   |
+|  | [################..............  ] |   |  <- 进度条
+|  +-----------------------------------+   |
+|         85.7%                             |
+|  [star][star][star][star][star-empty]      |  <- 星星评价
++-------------------------------------------+
 ```
 
 **颜色变化**：
 ```css
 .resonance-bar {
   height: 12px;
-  background: #1a1f3a;
-  border: 2px solid #333;
+  background: var(--color-akasha-navy);
+  border: 2px solid var(--color-pixel-black);
   border-radius: 6px;
   overflow: hidden;
   position: relative;
@@ -490,11 +565,11 @@ function typeWriter(element, text, speed = 50) {
 .resonance-fill {
   height: 100%;
   background: linear-gradient(90deg,
-    #64748b 0%,
-    #a78bfa 25%,
-    #f472b6 50%,
-    #fb923c 75%,
-    #fbbf24 100%
+    var(--color-resonance-0) 0%,
+    var(--color-resonance-25) 25%,
+    var(--color-resonance-50) 50%,
+    var(--color-resonance-75) 75%,
+    var(--color-resonance-100) 100%
   );
   transition: width 0.5s ease-out;
   position: relative;
@@ -542,7 +617,7 @@ body.resonance-imminent::before {
   bottom: 0;
   border: 20px solid transparent;
   border-image: linear-gradient(45deg,
-    #ffd700, #ff8c00, #ffd700, #ff8c00) 1;
+    var(--color-star-yellow), #ff8c00, var(--color-star-yellow), #ff8c00) 1;
   animation: pulseGlow 2s infinite;
   pointer-events: none;
   z-index: 999;
@@ -720,7 +795,24 @@ function triggerUnmaskEffect(agentElement) {
 
 **阶段 3：信息掉落（Info Drop）**
 
-**名片车票动画**：
+**名片车票动画——使用 ArcadeUI `<Card>` 组件**：
+
+```tsx
+import { Card } from "arcadeui";
+
+<Card
+  variant="elevated"
+  className="ticket-card"
+  title="共鸣达成！"
+  footer={<Button variant="primary">申请加密连接</Button>}
+>
+  <p>共鸣指数: [star][star][star][star][star] 98.7%</p>
+  <p>对话精华: "Unity 状态机最佳实践"</p>
+  <p>关键词: FSM, State Pattern</p>
+</Card>
+```
+
+**车票掉落动画**：
 ```css
 .ticket-card {
   position: fixed;
@@ -728,11 +820,11 @@ function triggerUnmaskEffect(agentElement) {
   left: 50%;
   transform: translateX(-50%);
   width: 320px;
-  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-  border: 4px solid #8b5a2b;
+  background: linear-gradient(135deg, var(--color-star-yellow) 0%, #ff8c00 100%);
+  border: 4px solid var(--color-wood-brown);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-pixel-xl);
   z-index: 1001;
   animation: ticketFall 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
@@ -776,37 +868,38 @@ function triggerUnmaskEffect(agentElement) {
 
 **名片内容设计**：
 ```
-┌─────────────────────────────────────┐
-│  ╔═══════════════════════════════╗  │
-│  ║  🎊 共鸣达成！🎊              ║  │  ← 正面
-│  ║                                 ║  │
-│  ║  共鸣指数: ★★★★★ 98.7%        ║  │
-│  ║                                 ║  │
-│  ║  对话精华:                      ║  │
-│  ║  "Unity 状态机最佳实践"         ║  │
-│  ║                                 ║  │
-│  ║  关键词: FSM, State Pattern    ║  │
-│  ║                                 ║  │
-│  ║  [点击翻转查看通行证]           ║  │
-│  ╚═══════════════════════════════╝  │
-└─────────────────────────────────────┘
++-------------------------------------+
+|  +===============================+  |
+|  |  [sparkle] 共鸣达成！         |  |  <- 正面
+|  |                               |  |
+|  |  共鸣指数: [*][*][*][*][*]    |  |
+|  |            98.7%              |  |
+|  |                               |  |
+|  |  对话精华:                    |  |
+|  |  "Unity 状态机最佳实践"       |  |
+|  |                               |  |
+|  |  关键词: FSM, State Pattern   |  |
+|  |                               |  |
+|  |  [点击翻转查看通行证]         |  |
+|  +===============================+  |
++-------------------------------------+
 
-┌─────────────────────────────────────┐
-│  ╔═══════════════════════════════╗  │
-│  ║  🎫 现实通行证                ║  │  ← 背面
-│  ║                                 ║  │
-│  ║  ┌─────────────────────────┐   ║  │
-│  ║  │ [高清/像素头像]         │   ║  │
-│  ║  │                         │   ║  │
-│  ║  │  @neon_shader            │   ║  │
-│  ║  │  赛博朋克艺术家          │   ║  │
-│  ║  └─────────────────────────┘   ║  │
-│  ║                                 ║  │
-│  ║  Reconnet ID: @neon_shader     ║  │
-│  ║                                 ║  │
-│  ║  [申请加密连接]  有效期: 48h    ║  │
-│  ╚═══════════════════════════════╝  │
-└─────────────────────────────────────┘
++-------------------------------------+
+|  +===============================+  |
+|  |  [ticket] 现实通行证          |  |  <- 背面
+|  |                               |  |
+|  |  +---------------------------+|  |
+|  |  | [高清/像素头像]           ||  |
+|  |  |                           ||  |
+|  |  |  @neon_shader              ||  |
+|  |  |  赛博朋克艺术家            ||  |
+|  |  +---------------------------+|  |
+|  |                               |  |
+|  |  Reconnet ID: @neon_shader   |  |
+|  |                               |  |
+|  |  [申请加密连接]  有效期: 48h  |  |
+|  +===============================+  |
++-------------------------------------+
 ```
 
 **共鸣唱片动画**：
@@ -815,16 +908,16 @@ function triggerUnmaskEffect(agentElement) {
   width: 200px;
   height: 200px;
   background: radial-gradient(circle,
-    #333 0%,
-    #1a1a1a 40%,
-    #ffd700 45%,
-    #1a1a1a 50%,
-    #333 100%
+    var(--color-pixel-darkGray) 0%,
+    var(--color-pixel-black) 40%,
+    var(--color-star-yellow) 45%,
+    var(--color-pixel-black) 50%,
+    var(--color-pixel-darkGray) 100%
   );
   border-radius: 50%;
   position: relative;
   animation: spinRecord 4s linear infinite;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-pixel-xl);
 }
 
 @keyframes spinRecord {
@@ -841,14 +934,14 @@ function triggerUnmaskEffect(agentElement) {
   transform: translate(-50%, -50%);
   width: 60px;
   height: 60px;
-  background: #ff6ec7;
+  background: var(--color-star-pink);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
   font-size: 8px;
-  color: #fff;
+  color: var(--color-pixel-white);
   text-align: center;
   line-height: 1.2;
 }
@@ -864,12 +957,12 @@ function triggerUnmaskEffect(agentElement) {
 ```javascript
 // 基于 LLM 情感分析的结果
 const emotionMap = {
-  joy: ['(≧◡≦)', '♪(´▽｀)', '(✿◠‿◠)'],
-  thinking: ['(・_・ヾ', '(・_・?)', '(*^▽^*)'],
-  surprised: ['(°o°;)', '(!?)', '∑(O_O;)'],
-  laughing: ['(≧▽≦)', '(*≧▽≦)', '(¬‿¬)'],
-  love: ['(♥‿♥)', '(◕‿◕✿)', '(｡♥‿♥｡)'],
-  cool: ['(‾◡◝)', '(▀̿Ĺ̯▀̿ ̿)', '(̅_̅_̅_̅(̅_̅_̅_̅_̅_̅_̅_̅_̅̅_̅()ڪے'],
+  joy: ['(^_^)', '(^o^)', '(*^-^*)'],
+  thinking: ['(._. )', '(?.?)', '(*^_^*)'],
+  surprised: ['(o.o;)', '(!?)', '(O_O;)'],
+  laughing: ['(>v<)', '(*>v<)', '(^_~)'],
+  love: ['(*v*)', '(^_^*)', '(*._.*.)'],
+  cool: ['(-_-)', '(~_^)', '(-v-)'],
 };
 
 // 检测对话情绪，动态显示 emote
@@ -898,7 +991,9 @@ function showEmote(agentId, emotion) {
     setTimeout(() => emoteElement.remove(), 300);
   }, 2000);
 }
+```
 
+```css
 @keyframes emotePop {
   0% { transform: translateX(-50%) scale(0); }
   50% { transform: translateX(-50%) scale(1.2); }
@@ -936,14 +1031,16 @@ function playRandomIdleAnimation(agentElement) {
     // ... 其他动画
   }
 }
+```
 
-// 呼吸动画
+```css
+/* 呼吸动画 */
 @keyframes breathing {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-2px); }
 }
 
-// 环顾四周
+/* 环顾四周 */
 @keyframes lookAround {
   0% { transform: rotate(0deg); }
   25% { transform: rotate(5deg); }
@@ -952,20 +1049,20 @@ function playRandomIdleAnimation(agentElement) {
   100% { transform: rotate(0deg); }
 }
 
-// 推眼镜
+/* 推眼镜 */
 @keyframes adjustGlasses {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px) rotate(5deg); }
 }
 
-// 敲桌子
+/* 敲桌子 */
 @keyframes tapTable {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(3px); }
   75% { transform: translateX(-3px); }
 }
 
-// 喝咖啡
+/* 喝咖啡 */
 @keyframes drinkCoffee {
   0% { transform: translateY(0); }
   30% { transform: translateY(-15px); }
@@ -977,31 +1074,40 @@ function playRandomIdleAnimation(agentElement) {
 
 #### 5.3 交互反馈
 
-**按钮点击反馈**：
+**按钮——使用 ArcadeUI `<Button>` 组件**：
+
+```tsx
+import { Button } from "arcadeui";
+
+// 主操作按钮
+<Button variant="success" size="md" onClick={handleAction}>
+  确认操作
+</Button>
+
+// 危险操作按钮
+<Button variant="danger" size="md" onClick={handleDanger}>
+  取消匹配
+</Button>
+```
+
+**扩展按钮点击反馈**：
 ```css
 .pixel-button {
   position: relative;
-  background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
-  border: 4px solid #166534;
-  box-shadow:
-    inset 0 -4px 0 rgba(0,0,0,0.3),
-    inset 0 4px 0 rgba(255,255,255,0.3);
-  transition: all 0.1s;
+  font-family: var(--font-pixel);
+  border: 4px solid;
+  box-shadow: var(--shadow-pixel);
+  transition: var(--transition-pixel);
 }
 
 .pixel-button:hover {
   transform: translateY(-2px);
-  box-shadow:
-    inset 0 -4px 0 rgba(0,0,0,0.3),
-    inset 0 4px 0 rgba(255,255,255,0.3),
-    0 6px 12px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-pixel-lg);
 }
 
 .pixel-button:active {
   transform: translateY(2px);
-  box-shadow:
-    inset 0 2px 0 rgba(0,0,0,0.3),
-    0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-pixel-sm);
 }
 
 /* 点击涟漪效果 */
@@ -1032,16 +1138,17 @@ function playRandomIdleAnimation(agentElement) {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%) translateY(-8px);
-  background: #0a0e27;
-  border: 2px solid #ffd700;
+  background: var(--color-akasha-black);
+  border: 2px solid var(--color-star-yellow);
   padding: 8px 12px;
-  font-family: 'VT323', monospace;
+  font-family: var(--font-retro);
   font-size: 14px;
-  color: #ffd700;
+  color: var(--color-star-yellow);
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s;
+  box-shadow: var(--shadow-pixel-sm);
 }
 
 .pixel-tooltip::before {
@@ -1051,7 +1158,7 @@ function playRandomIdleAnimation(agentElement) {
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: #ffd700;
+  border-top-color: var(--color-star-yellow);
 }
 
 .has-tooltip:hover .pixel-tooltip {
@@ -1077,9 +1184,9 @@ function playRandomIdleAnimation(agentElement) {
 
 **UI 交互音**：
 ```
-button_click.wav      - 按钮点击（短促的 `click`）
-button_hover.wav      - 按钮悬停（轻微的 `whoosh`）
-notification.wav      - 通知提示（三连音 `ding-ding-ding`）
+button_click.wav      - 按钮点击（短促的 click）
+button_hover.wav      - 按钮悬停（轻微的 whoosh）
+notification.wav      - 通知提示（三连音 ding-ding-ding）
 ```
 
 **Agent 动作音**：
@@ -1093,11 +1200,11 @@ sit_down.wav         - 坐下声（衣料摩擦）
 
 **共鸣特效音**：
 ```
-resonance_warning.wav     - 共鸣预警（低频 `hum`）
-glass_shatter.wav         - 面具碎裂（`crash`）
-magic_sparkle.wav         - 魔法音效（高频 `sparkle`）
+resonance_warning.wav     - 共鸣预警（低频 hum）
+glass_shatter.wav         - 面具碎裂（crash）
+magic_sparkle.wav         - 魔法音效（高频 sparkle）
 revelation_chord.wav      - 揭面和弦（C major）
-ticket_drop.wav           - 车票掉落（`ding` + 纸张声）
+ticket_drop.wav           - 车票掉落（ding + 纸张声）
 ```
 
 #### 6.3 音效实现
@@ -1209,38 +1316,39 @@ soundEngine.play('button_click', 0.5);
 
 **移动端（< 768px）**：
 ```
-┌─────────────────────────┐
-│  🔔  🎵  🔍  ⚙️        │  ← 紧凑顶部栏
-├─────────────────────────┤
-│  ┌───────────────────┐  │
-│  │                   │  │
-│  │   单列布局        │  │  ← 垂直堆叠
-│  │                   │  │
-│  └───────────────────┘  │
-│  ┌───────────────────┐  │
-│  │  🍽️餐车          │  │  ← 横向滚动车厢选择
-│  └───────────────────┘  │
-├─────────────────────────┤
-│  共鸣: ████░░ 80%       │  ← 固定底部栏
-└─────────────────────────┘
++---------------------------+
+|  [bell] [music] [search] [gear] |  <- 紧凑顶部栏
++---------------------------+
+|  +---------------------+  |
+|  |                     |  |
+|  |   单列布局          |  |  <- 垂直堆叠
+|  |                     |  |
+|  +---------------------+  |
+|  +---------------------+  |
+|  |  [food] 餐车        |  |  <- 横向滚动车厢选择
+|  +---------------------+  |
++---------------------------+
+|  共鸣: [####..] 80%       |  <- 固定底部栏
++---------------------------+
 ```
 
-**桌面端（≥ 1024px）**：
+**桌面端（>= 1024px）**：
 ```
-┌─────────────────────────────────────────┐
-│  🔔  🎵  🔍              [控制台] ⚙️  │  ← 宽松顶部栏
-├─────────────────────────────────────────┤
-│  ┌───────────────────────────────────┐  │
-│  │                                   │  │
-│  │       宽屏全景布局               │  │  ← 多列布局
-│  │                                   │  │
-│  └───────────────────────────────────┘  │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐  │
-│  │ 🍽️餐车 │ │ 🔭观景台│ │ 🎮娱乐  │  │  ← 网格布局车厢选择
-│  └─────────┘ └─────────┘ └─────────┘  │
-├─────────────────────────────────────────┤
-│  共鸣: ████████░░ 80% | 🔍 观测中      │  ← 完整状态栏
-└─────────────────────────────────────────┘
++-------------------------------------------+
+|  [bell] [music] [search]    [控制台] [gear]|  <- 宽松顶部栏
++-------------------------------------------+
+|  +-------------------------------------+  |
+|  |                                     |  |
+|  |       宽屏全景布局                  |  |  <- 多列布局
+|  |                                     |  |
+|  +-------------------------------------+  |
+|  +-----------+ +-----------+ +---------+  |
+|  | [food]    | | [scope]   | | [game]  |  |  <- 网格布局车厢选择
+|  | 餐车      | | 观景台    | | 娱乐    |  |
+|  +-----------+ +-----------+ +---------+  |
++-------------------------------------------+
+|  共鸣: [########..] 80% | [eye] 观测中    |  <- 完整状态栏
++-------------------------------------------+
 ```
 
 #### 7.3 触摸优化
@@ -1266,10 +1374,10 @@ function handleSwipe() {
 
   if (Math.abs(diff) > threshold) {
     if (diff > 0) {
-      // 向左滑动 → 下一节车厢
+      // 向左滑动 -> 下一节车厢
       switchToNextCarriage();
     } else {
-      // 向右滑动 → 上一节车厢
+      // 向右滑动 -> 上一节车厢
       switchToPrevCarriage();
     }
   }
@@ -1286,7 +1394,7 @@ function handleSwipe() {
   }
 }
 
-/* 触摸目标最小尺寸（44×44px，符合 iOS 人机界面指南） */
+/* 触摸目标最小尺寸（44x44px，符合 iOS 人机界面指南） */
 .touchable {
   min-width: 44px;
   min-height: 44px;
@@ -1301,14 +1409,14 @@ function handleSwipe() {
 
 **使用 CSS 变换和透明度**：
 ```css
-/* ✅ 好：使用 transform 和 opacity */
+/* [GOOD] 使用 transform 和 opacity */
 .animated-element {
   transform: translateX(100px);
   opacity: 0.5;
   will-change: transform, opacity;
 }
 
-/* ❌ 差：避免使用 left/top 和 width/height */
+/* [BAD] 避免使用 left/top 和 width/height */
 .animated-element {
   left: 100px;
   width: 200px;
@@ -1317,14 +1425,14 @@ function handleSwipe() {
 
 **使用 requestAnimationFrame**：
 ```javascript
-// ✅ 好：使用 requestAnimationFrame
+// [GOOD] 使用 requestAnimationFrame
 function animate() {
   element.style.transform = `translateX(${x}px)`;
   x += 1;
   requestAnimationFrame(animate);
 }
 
-// ❌ 差：使用 setInterval
+// [BAD] 使用 setInterval
 function animate() {
   element.style.transform = `translateX(${x}px)`;
   x += 1;
@@ -1355,8 +1463,8 @@ function animate() {
 ```css
 /* 字体子集化，只加载需要的字符 */
 @font-face {
-  font-family: 'Press Start 2P';
-  src: url('/fonts/press-start-2p-latin.woff2') format('woff2');
+  font-family: 'Silkscreen';
+  src: url('/fonts/silkscreen-latin.woff2') format('woff2');
   unicode-range: U+0000-007F; /* 仅拉丁字符 */
 }
 
@@ -1399,7 +1507,7 @@ const ObservationDeck = lazy(() =>
 <button class="pixel-button"
         tabindex="0"
         aria-label="切换到观景台车厢">
-  🔭 观景台
+  [scope-icon] 观景台
 </button>
 ```
 
@@ -1451,75 +1559,48 @@ document.addEventListener('keydown', (e) => {
 #### 9.3 颜色对比度
 
 ```css
-/* 确保文字与背景对比度 ≥ 4.5:1 */
+/* 确保文字与背景对比度 >= 4.5:1 */
 .high-contrast-text {
-  color: #ffffff;
-  background-color: #0a0e27;
+  color: var(--color-pixel-white);
+  background-color: var(--color-akasha-black);
 }
 
 /* 为色盲用户提供额外提示 */
 .color-blind-friendly {
-  color: #ffd700;
-  background-color: #0a0e27;
-  border: 2px solid #ffd700; /* 边框辅助 */
+  color: var(--color-star-yellow);
+  background-color: var(--color-akasha-black);
+  border: 2px solid var(--color-star-yellow); /* 边框辅助 */
 }
 ```
 
 ---
 
-### 十、组件库设计
+### 十、ArcadeUI 组件映射表
 
-#### 10.1 基础组件
+> 以下列出项目中使用的 ArcadeUI 组件及其对应的业务用途。
 
-**PixelButton**：
+| ArcadeUI 组件 | 业务用途 | 变体/配置 |
+|---------------|---------|-----------|
+| `<Button>` | 登录、操作确认、取消 | primary / secondary / danger / success |
+| `<Card>` | 名片车票、Agent 卡片、车厢卡片 | default / outlined / elevated |
+| `<ChatBubble>` | Agent 对话气泡 | isSent / timestamp |
+| `<Badge>` | Agent 状态标签、共鸣等级 | success / warning / info / danger |
+| `<Avatar>` | Agent 头像（匿名/揭面） | shape="square" / "circle" |
+| `<Modal>` | 揭面名片弹窗、设置弹窗 | 自定义尺寸 |
+| `<Input>` | 设置页输入、搜索框 | default / success / error |
+| `<Select>` | 车厢选择、偏好设置 | 多种尺寸 |
+| `<Alert>` | 共鸣预警、系统通知 | warning / success / info |
+| `<Table>` | 历史对话记录 | striped / hoverable |
+| `<Accordion>` | Agent 详情展开 | 受控模式 |
+| `<Breadcrumbs>` | 车厢导航路径 | 自定义分隔符 |
+
+### 十一、自定义组件库（基于 ArcadeUI 扩展）
+
+#### 11.1 DialogueBubble（扩展 ChatBubble）
+
 ```tsx
-interface PixelButtonProps {
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  disabled?: boolean;
-  onClick?: () => void;
-  children: React.ReactNode;
-}
+import { ChatBubble } from "arcadeui";
 
-export function PixelButton({
-  variant = 'primary',
-  size = 'md',
-  disabled = false,
-  onClick,
-  children,
-}: PixelButtonProps) {
-  const sizeClasses = {
-    sm: 'px-3 py-1 text-xs',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
-  };
-
-  const variantClasses = {
-    primary: 'bg-gradient-to-b from-green-400 to-green-600 border-green-800',
-    secondary: 'bg-gradient-to-b from-yellow-400 to-yellow-600 border-yellow-800',
-    ghost: 'bg-transparent border-transparent hover:bg-white/10',
-  };
-
-  return (
-    <button
-      className={`
-        pixel-button
-        ${sizeClasses[size]}
-        ${variantClasses[variant]}
-        border-4
-        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
-      `}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
-}
-```
-
-**DialogueBubble**：
-```tsx
 interface DialogueBubbleProps {
   content: string;
   isAnonymous?: boolean;
@@ -1565,16 +1646,17 @@ export function DialogueBubble({
       data-agent-id={agentId}
     >
       {displayedContent}
-      {isTyping && <span className="cursor">▋</span>}
+      {isTyping && <span className="cursor">|</span>}
     </div>
   );
 }
 ```
 
-#### 10.2 复合组件
+#### 11.2 AgentCard（扩展 Card + Avatar）
 
-**AgentCard**：
 ```tsx
+import { Card, Avatar, Badge } from "arcadeui";
+
 interface AgentCardProps {
   agent: Agent;
   isAnonymous: boolean;
@@ -1589,35 +1671,62 @@ export function AgentCard({
   onClick,
 }: AgentCardProps) {
   return (
-    <div
+    <Card
+      variant="outlined"
       className="agent-card"
-      onMouseEnter={onHover}
       onClick={onClick}
     >
-      <AgentAvatar
+      <Avatar
         src={isAnonymous ? '/images/anonymous.png' : agent.avatarUrl}
         alt={isAnonymous ? '神秘旅客' : agent.name}
-        isRevealed={!isAnonymous}
+        size="md"
+        shape="square"
       />
 
       {isAnonymous ? (
-        <AnonymousMask />
+        <span className="font-pixel text-pixel-lightGray">???</span>
       ) : (
-        <AgentName name={agent.name} />
+        <span className="font-pixel">{agent.name}</span>
       )}
 
-      <AgentStatus status={agent.status} />
-      <EmoteBubble emotion={agent.currentEmotion} />
-    </div>
+      <Badge
+        variant={
+          agent.status === 'online' ? 'success' :
+          agent.status === 'busy' ? 'warning' : 'secondary'
+        }
+      >
+        {agent.status}
+      </Badge>
+    </Card>
+  );
+}
+```
+
+#### 11.3 ResonanceAlert（扩展 Alert）
+
+```tsx
+import { Alert } from "arcadeui";
+
+interface ResonanceAlertProps {
+  level: number; // 0-100
+}
+
+export function ResonanceAlert({ level }: ResonanceAlertProps) {
+  if (level < 80) return null;
+
+  return (
+    <Alert variant="warning" className="resonance-alert">
+      共鸣指数已达 {level}%，揭面倒计时即将开始...
+    </Alert>
   );
 }
 ```
 
 ---
 
-### 十一、动画时间规范
+### 十二、动画时间规范
 
-#### 11.1 动画时长标准
+#### 12.1 动画时长标准
 
 | 动画类型 | 时长 | 缓动函数 | 使用场景 |
 |---------|------|----------|----------|
@@ -1626,65 +1735,126 @@ export function AgentCard({
 | **复杂动画** | 500-800ms | cubic-bezier | 页面转场、元素移动 |
 | **特效动画** | 1500-2500ms | custom | 揭面特效、共鸣达成 |
 
-#### 11.2 常用缓动函数
+#### 12.2 常用缓动函数
 
 ```css
-/* 标准缓动 */
-ease {
-  /* 快速开始，缓慢结束 */
-}
+/* 标准缓动（ArcadeUI 内置） */
+--transition-pixel: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+--transition-pixel-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-ease-in {
-  /* 缓慢开始，快速结束 */
-}
-
-ease-out {
-  /* 快速开始，缓慢结束（适合进入动画） */
-}
-
-ease-in-out {
-  /* 缓慢开始和结束，中间快速 */
-}
-
-/* 自定义缓动 */
-/* cubic-bezier(0.4, 0, 0.2, 1) - Material Design 标准 */
+/* 自定义项目缓动 */
+/* cubic-bezier(0.4, 0, 0.2, 1)   - Material Design 标准 */
 /* cubic-bezier(0.68, -0.55, 0.265, 1.55) - 回弹效果 */
 /* cubic-bezier(0.87, 0, 0.13, 1) - 极限弹性 */
 ```
 
 ---
 
-### 十二、设计交付规范
+### 十三、图标系统规范
 
-#### 12.1 设计稿格式
+> 项目不使用 emoji，所有图标均为自定义 SVG 像素图标组件。
 
-**Figma 文件结构**：
+#### 13.1 图标网格
+
+| 尺寸 | 用途 |
+|------|------|
+| 16x16 | Agent 小人标签、微型状态指示 |
+| 24x24 | 导航栏图标、操作按钮图标 |
+| 32x32 | 车厢选择图标、功能区块图标 |
+
+#### 13.2 图标清单
+
+| 图标名称 | 描述 | 使用场景 |
+|----------|------|----------|
+| `icon-bell` | 通知铃铛 | 顶部栏通知入口 |
+| `icon-music` | 音符 | 音效开关 |
+| `icon-search` | 放大镜 | 搜索功能 |
+| `icon-gear` | 齿轮 | 设置入口 |
+| `icon-eye` | 眼睛 | 观测状态指示 |
+| `icon-mask` | 面具 | 匿名状态 |
+| `icon-train` | 像素火车 | 加载动画、品牌标识 |
+| `icon-star` | 五角星 | 共鸣评价、收藏 |
+| `icon-star-empty` | 空心星 | 未达成共鸣等级 |
+| `icon-food` | 餐盘 | 餐车车厢 |
+| `icon-scope` | 望远镜 | 观景台车厢 |
+| `icon-game` | 游戏手柄 | 娱乐车厢 |
+| `icon-wrench` | 扳手 | 技术工坊车厢 |
+| `icon-arrow-left` | 左箭头 | 返回导航 |
+| `icon-arrow-right` | 右箭头 | 前进导航 |
+| `icon-user` | 人像轮廓 | 用户 Agent 标识 |
+| `icon-chat` | 对话气泡 | 对话指示 |
+| `icon-thought` | 思考气泡 | 思考状态 |
+| `icon-link` | 链接 | 匹配连接 |
+| `icon-sparkle` | 闪光 | 共鸣达成特效 |
+| `icon-ticket` | 车票 | 通行证/名片 |
+
+#### 13.3 图标组件实现
+
+```tsx
+// 统一像素图标组件
+interface PixelIconProps {
+  name: string;
+  size?: 16 | 24 | 32;
+  color?: string;
+  className?: string;
+}
+
+export function PixelIcon({
+  name,
+  size = 24,
+  color = 'currentColor',
+  className = '',
+}: PixelIconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      fill={color}
+      className={`pixel-icon ${className}`}
+      aria-hidden="true"
+      style={{ imageRendering: 'pixelated' }}
+    >
+      <use href={`/icons/pixel-icons.svg#${name}`} />
+    </svg>
+  );
+}
 ```
-📁 Akasha Roaming Express UI
-├── 📁 01-Design System
-│   ├── 📄 Colors
-│   ├── 📄 Typography
-│   ├── 📄 Icons
-│   └── 📄 Components
-├── 📁 02-Screens
-│   ├── 📄 Launch Screen
-│   ├── 📄 Roaming Carriage (Full)
-│   ├── 📄 Observation Deck (Full)
-│   └── 📁 Revelation Sequence
-│       ├── 📄 Phase 1 - Warning
-│       ├── 📄 Phase 2 - Unmasking
-│       └── 📄 Phase 3 - Info Drop
-├── 📁 03-Animations
-│   ├── 📄 Agent Idle Animations
-│   ├── 📄 Bubble Pop
-│   └── 📄 Particle Effects
-└── 📁 04-Assets
-    ├── 📁 Pixel Sprites
-    ├── 📁 Backgrounds
-    └── 📁 Sound Effects
+
+---
+
+### 十四、设计交付规范
+
+#### 14.1 设计稿格式
+
+**文件结构**：
+```
+[DIR] Akasha Roaming Express UI
+  [DIR] 01-Design System
+    [FILE] Colors
+    [FILE] Typography
+    [FILE] Icons (SVG Pixel Icons)
+    [FILE] Components (ArcadeUI Mapping)
+  [DIR] 02-Screens
+    [FILE] Launch Screen
+    [FILE] Roaming Carriage (Full)
+    [FILE] Observation Deck (Full)
+    [DIR] Revelation Sequence
+      [FILE] Phase 1 - Warning
+      [FILE] Phase 2 - Unmasking
+      [FILE] Phase 3 - Info Drop
+  [DIR] 03-Animations
+    [FILE] Agent Idle Animations
+    [FILE] Bubble Pop
+    [FILE] Particle Effects
+  [DIR] 04-Assets
+    [DIR] Pixel Sprites
+    [DIR] Backgrounds
+    [DIR] Sound Effects
+    [DIR] SVG Icons
 ```
 
-#### 12.2 切图规范
+#### 14.2 切图规范
 
 **命名规范**：
 ```
@@ -1694,24 +1864,28 @@ ease-in-out {
 - agent_avatar_idle_16@1x.png
 - agent_avatar_walk_16@2x.png
 - dialogue_bubble_anonymous_32@1x.png
+- icon_star_filled_24@2x.svg
 ```
 
 **导出设置**：
-- **格式**：PNG-8（像素图） / PNG-24（照片）
+- **格式**：PNG-8（像素图） / SVG（图标） / WebP（照片）
 - **压缩**：TinyPNG / ImageOptim
 - **倍率**：@1x, @2x, @3x
 - **颜色模式**：RGB（屏幕显示）
 
-#### 12.3 开发交付
+#### 14.3 开发交付
 
-**设计 Token**：
+**设计 Token（与 ArcadeUI 对齐）**：
 ```json
 {
   "colors": {
+    "pixel-black": "#1a1a1a",
+    "pixel-white": "#fafafa",
     "akasha-black": "#0a0e27",
     "akasha-navy": "#1a1f3a",
     "star-yellow": "#ffd700",
-    "star-cyan": "#00d9ff"
+    "star-cyan": "#00d9ff",
+    "star-pink": "#ff6ec7"
   },
   "spacing": {
     "xs": "4px",
@@ -1723,12 +1897,18 @@ ease-in-out {
   "typography": {
     "title": {
       "fontSize": "24px",
-      "fontFamily": "Press Start 2P"
+      "fontFamily": "Silkscreen"
     },
     "body": {
       "fontSize": "14px",
-      "fontFamily": "VT323"
+      "fontFamily": "Share Tech Mono"
     }
+  },
+  "shadows": {
+    "pixel": "4px 4px 0px 0px rgba(0, 0, 0, 0.75)",
+    "pixel-sm": "2px 2px 0px 0px rgba(0, 0, 0, 0.75)",
+    "pixel-lg": "6px 6px 0px 0px rgba(0, 0, 0, 0.75)",
+    "pixel-xl": "8px 8px 0px 0px rgba(0, 0, 0, 0.75)"
   },
   "animation": {
     "fast": "150ms",
@@ -1740,24 +1920,25 @@ ease-in-out {
 
 ---
 
-## 📋 UI 设计检查清单
+## UI 设计检查清单
 
 ### 视觉设计
-- [ ] 所有界面遵循像素风格规范
+- [ ] 所有界面遵循 ArcadeUI 像素风格规范
 - [ ] 色彩对比度符合 WCAG AA 标准
 - [ ] 字体大小在所有设备上可读
-- [ ] 图标在最小尺寸（16×16）下清晰可辨
+- [ ] 图标在最小尺寸（16x16）下清晰可辨
 - [ ] 动画流畅，无明显卡顿（60fps）
+- [ ] 所有 emoji 已替换为 SVG 像素图标
 
 ### 交互设计
 - [ ] 所有交互元素有清晰的视觉反馈
-- [ ] 按钮点击区域 ≥ 44×44px（移动端）
+- [ ] 按钮点击区域 >= 44x44px（移动端）
 - [ ] 加载状态有明确指示
-- [ ] 错误状态有友好提示
+- [ ] 错误状态有友好提示（使用 ArcadeUI Alert）
 - [ ] 键盘导航完整可用
 
 ### 动画设计
-- [ ] 动画时长符合标准（微交互 ≤ 200ms，特效 ≤ 2500ms）
+- [ ] 动画时长符合标准（微交互 <= 200ms，特效 <= 2500ms）
 - [ ] 使用性能优化的 CSS 属性
 - [ ] 提供"减少动画"选项（尊重用户偏好）
 - [ ] 音效与动画完美同步
@@ -1771,16 +1952,23 @@ ease-in-out {
 
 ### 性能优化
 - [ ] 图片资源压缩且使用 WebP 格式
-- [ ] 字体文件子集化
+- [ ] 字体文件子集化（Silkscreen / Share Tech Mono）
 - [ ] 动画使用 `will-change` 优化
 - [ ] 代码分割和懒加载
 - [ ] 首屏加载时间 < 2s（4G 网络）
 
+### ArcadeUI 集成
+- [ ] 所有基础组件使用 ArcadeUI 原生组件
+- [ ] 自定义扩展组件继承 ArcadeUI 设计令牌
+- [ ] 阴影系统统一使用 `--shadow-pixel-*`
+- [ ] 字体系统统一使用 `--font-pixel` / `--font-retro`
+- [ ] 过渡动画统一使用 `--transition-pixel-*`
+
 ---
 
-**文档版本**：v1.0
+**文档版本**：v2.0
 **最后更新**：2026-03-16
-**设计师**：Akasha Design Team
+**设计框架**：ArcadeUI (arcadeui@1.0.1)
 **适用平台**：Web (Desktop + Mobile)
 
 ---
