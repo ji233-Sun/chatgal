@@ -1,5 +1,7 @@
 "use client";
 
+import type { CSSProperties } from "react";
+
 /**
  * PixelIcon - 统一像素图标组件
  * 所有图标均为 16x16 / 24x24 / 32x32 SVG 像素图标
@@ -10,6 +12,7 @@ interface PixelIconProps {
   size?: number;
   color?: string;
   className?: string;
+  style?: CSSProperties;
 }
 
 export default function PixelIcon({
@@ -17,6 +20,7 @@ export default function PixelIcon({
   size = 24,
   color = "currentColor",
   className = "",
+  style,
 }: PixelIconProps) {
   const iconPaths: Record<string, string> = {
     // 通知铃铛
@@ -123,7 +127,7 @@ export default function PixelIcon({
       strokeLinejoin="round"
       className={`pixel-icon ${className}`}
       aria-hidden="true"
-      style={{ imageRendering: "pixelated" }}
+      style={{ imageRendering: "pixelated", ...style }}
     >
       <path d={pathD} />
     </svg>
