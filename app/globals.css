@@ -212,19 +212,13 @@ body {
   /* 基础文字颜色提升 */
   color: rgba(255, 255, 255, 0.9);
 
-  /* 彻底干掉 ArcadeUI Card 的默认白边和白背景 */
-  & [class*="arcade-card"], 
+  /* ArcadeUI Card 深色适配（仅保留列车系统其他页面可能的引用） */
+  & [class*="arcade-card"],
   & .arcade-card {
     background: rgba(13, 18, 48, 0.5) !important;
-    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
     color: rgba(255, 255, 255, 0.9) !important;
-    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.8) !important;
-  }
-
-  /* 修复 UserProfile 等组件内部可能出现的白色背景 */
-  & div[class*="bg-white"],
-  & .bg-white {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.6) !important;
   }
 
   /* 铭牌样式修正：增加对比度 */

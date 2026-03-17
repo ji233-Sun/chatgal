@@ -57,17 +57,14 @@ export default function TrainStationPage() {
           <PixelIcon name="icon-arrow-left" size={16} color="currentColor" />
           返回
         </Link>
-        <div className="flex items-center gap-3">
-          <PixelIcon name="icon-bell" size={20} color="currentColor" className="text-white/20 hover:text-white/40 transition-colors cursor-pointer" />
-          <PixelIcon name="icon-music" size={20} color="currentColor" className="text-white/20 hover:text-white/40 transition-colors cursor-pointer" />
-          <PixelIcon name="icon-gear" size={20} color="currentColor" className="text-white/20 hover:text-white/40 transition-colors cursor-pointer" />
-        </div>
+        {/* 右侧留空保持返回按钮对齐 */}
+        <div className="w-12" />
       </header>
 
       {/* Main — 响应式居中限宽 */}
       <main className="relative flex-1 flex flex-col items-center justify-center px-6 pb-20 w-full max-w-md md:max-w-2xl lg:max-w-4xl mx-auto">
         {/* 标题 */}
-        <div className="text-center mb-12">
+        <div className="flex flex-col items-center text-center mb-12">
           <PixelIcon name="icon-train" size={64} color="#ffd700" className="mb-6 animate-[bounce_2s_ease-in-out_infinite]" />
           <h1 className="font-pixel text-2xl font-bold text-white/90 mb-3">
             阿卡夏漫游列车
