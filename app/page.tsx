@@ -5,6 +5,7 @@ import { Button } from "arcadeui";
 import LoginButton from "./components/LoginButton";
 import UserProfile from "./components/UserProfile";
 import PixelIcon from "./components/ui/PixelIcon";
+import { CARRIAGE_NAMES } from "./lib/carriage";
 
 interface UserData {
   id: string;
@@ -13,9 +14,20 @@ interface UserData {
   route: string | null;
 }
 
+interface ActiveSession {
+  id: string;
+  carriageType: string;
+  currentTurn: number;
+  maxTurns: number;
+  updatedAt: string;
+}
+
+
 export default function Home() {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeSession, setActiveSession] = useState<ActiveSession | null>(null);
+  const [activeCount, setActiveCount] = useState(0);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -29,6 +41,23 @@ export default function Home() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  // 获取用户未完成的 ANONYMOUS 会话
+  useEffect(() => {
+    if (!user) return;
+    fetch("/api/train/sessions?state=ANONYMOUS")
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.code === 0) {
+          const active = result.data.sessions.filter(
+            (s: ActiveSession) => s.currentTurn > 0,
+          );
+          setActiveCount(active.length);
+          if (active.length > 0) setActiveSession(active[0]);
+        }
+      })
+      .catch(() => {});
+  }, [user]);
 
   if (loading) {
     return (
@@ -81,7 +110,44 @@ export default function Home() {
       {/* Main — 响应式：md 居中限宽, lg 双栏 */}
       <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-12">
         {user ? (
-          <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-8 w-full max-w-md md:max-w-2xl lg:max-w-5xl">
+          <div className="w-full max-w-md md:max-w-2xl lg:max-w-5xl space-y-6">
+            {/* 未完成会话恢复横幅 */}
+            {activeSession && (
+              <div className="rounded-lg bg-gradient-to-r from-[#131836] to-[#0F0F23] border border-purple-500/20 border-l-2 border-l-purple-500 p-4 flex items-center gap-4 animate-[fade-slide-up_0.5s_ease-out]">
+                <div className="shrink-0 w-2 h-8 bg-purple-500 rounded-full animate-pulse" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-pixel text-[10px] text-white/60 mb-1">
+                    你有一段未完成的旅途
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="font-pixel text-[10px] text-purple-400 font-bold">
+                      {CARRIAGE_NAMES[activeSession.carriageType] || "UNKNOWN"}
+                    </span>
+                    <span className="font-pixel text-[8px] text-white/20">
+                      {activeSession.currentTurn}/{activeSession.maxTurns}
+                    </span>
+                  </div>
+                </div>
+                <div className="shrink-0 flex items-center gap-3">
+                  {activeCount > 1 && (
+                    <a
+                      href="/train/history"
+                      className="font-pixel text-[8px] text-white/30 hover:text-white/50 transition-colors"
+                    >
+                      查看全部 →
+                    </a>
+                  )}
+                  <a
+                    href={`/train/${activeSession.id}`}
+                    className="font-pixel text-[10px] text-[#0A0E27] bg-purple-500 hover:bg-purple-400 px-3 py-1.5 rounded-sm transition-colors"
+                  >
+                    继续观测
+                  </a>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-8">
             {/* 左栏：用户信息 - 去掉白边包裹层 */}
             <div className="w-full lg:w-2/5 flex flex-col">
               <UserProfile user={user} />
@@ -130,13 +196,21 @@ export default function Home() {
                     </Button>
                   </div>
 
-                  <div className="mt-8 flex gap-4 opacity-30 group-hover:opacity-60 transition-opacity">
+                  <a
+                    href="/train/history"
+                    className="mt-4 font-pixel text-xs text-white/40 hover:text-[#ffd700] transition-colors"
+                  >
+                    旅途日志 →
+                  </a>
+
+                  <div className="mt-6 flex gap-4 opacity-30 group-hover:opacity-60 transition-opacity">
                     <PixelIcon name="icon-scope" size={20} color="currentColor" />
                     <PixelIcon name="icon-food" size={20} color="currentColor" />
                     <PixelIcon name="icon-game" size={20} color="currentColor" />
                   </div>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         ) : (

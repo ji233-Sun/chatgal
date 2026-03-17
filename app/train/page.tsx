@@ -57,8 +57,13 @@ export default function TrainStationPage() {
           <PixelIcon name="icon-arrow-left" size={16} color="currentColor" />
           返回
         </Link>
-        {/* 右侧留空保持返回按钮对齐 */}
-        <div className="w-12" />
+        <Link
+          href="/train/history"
+          className="inline-flex items-center gap-2 font-pixel text-xs text-white/30 hover:text-white/50 transition-colors"
+        >
+          日志
+          <PixelIcon name="icon-ticket" size={16} color="currentColor" />
+        </Link>
       </header>
 
       {/* Main — 响应式居中限宽 */}

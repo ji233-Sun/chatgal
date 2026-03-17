@@ -1,13 +1,14 @@
 /**
  * GET /api/train/sessions
  * 获取用户的所有观测会话列表
+ * 支持 ?state=REVEALED|FADED_OUT|ANONYMOUS 可选筛选
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { getCurrentUserId } from "@/app/lib/auth";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const userId = await getCurrentUserId();
     if (!userId) {
@@ -17,29 +18,62 @@ export async function GET() {
       );
     }
 
+    const stateFilter = request.nextUrl.searchParams.get("state");
+    const validStates = ["ANONYMOUS", "REVEALED", "FADED_OUT"];
+    const where: Record<string, unknown> = {
+      OR: [{ userAId: userId }, { userBId: userId }],
+    };
+    if (stateFilter && validStates.includes(stateFilter)) {
+      where.state = stateFilter;
+    }
+
     const sessions = await prisma.observationSession.findMany({
-      where: {
-        OR: [{ userAId: userId }, { userBId: userId }],
-      },
-      orderBy: { createdAt: "desc" },
+      where,
+      orderBy: { updatedAt: "desc" },
       select: {
         id: true,
         state: true,
         carriageType: true,
         currentTurn: true,
+        maxTurns: true,
         resonanceScore: true,
         createdAt: true,
+        updatedAt: true,
         userBId: true,
+        messages: {
+          orderBy: { timestamp: "desc" },
+          take: 1,
+          select: {
+            content: true,
+            timestamp: true,
+          },
+        },
       },
     });
 
     return NextResponse.json({
       code: 0,
       data: {
-        sessions: sessions.map((s) => ({
-          ...s,
-          isPhantom: !s.userBId,
-        })),
+        sessions: sessions.map((s) => {
+          const lastMsg = s.messages[0] ?? null;
+          return {
+            id: s.id,
+            state: s.state,
+            carriageType: s.carriageType,
+            currentTurn: s.currentTurn,
+            maxTurns: s.maxTurns,
+            resonanceScore: s.resonanceScore,
+            createdAt: s.createdAt,
+            updatedAt: s.updatedAt,
+            isPhantom: !s.userBId,
+            lastMessagePreview: lastMsg
+              ? lastMsg.content.length > 80
+                ? lastMsg.content.slice(0, 80) + "..."
+                : lastMsg.content
+              : null,
+            lastMessageAt: lastMsg?.timestamp ?? null,
+          };
+        }),
       },
     });
   } catch (error) {

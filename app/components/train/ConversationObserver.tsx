@@ -9,6 +9,7 @@ import { ChatBubble, Avatar, Card, Badge } from "arcadeui";
 import StrangerAvatar from "./StrangerAvatar";
 import RevelationEffect from "./RevelationEffect";
 import PixelIcon from "../ui/PixelIcon";
+import { CARRIAGE_NAMES, CARRIAGE_COLORS } from "@/app/lib/carriage";
 
 interface Message {
   id: string;
@@ -37,20 +38,6 @@ interface StrangerInfo {
 interface ConversationObserverProps {
   sessionId: string;
 }
-
-const CARRIAGE_NAMES: Record<string, string> = {
-  tech: "TECH_BAY",
-  art: "ART_GALLERY",
-  philosophy: "VOID_DECK",
-  gaming: "ARCADE_CORE",
-};
-
-const CARRIAGE_COLORS: Record<string, string> = {
-  tech: "#7C3AED",
-  art: "#F43F5E",
-  philosophy: "#22D3EE",
-  gaming: "#FACC15",
-};
 
 export default function ConversationObserver({ sessionId }: ConversationObserverProps) {
   const [session, setSession] = useState<SessionData | null>(null);
@@ -138,7 +125,8 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
         onComplete={() => {
           setRevealComplete(true);
           setShowReveal(false);
-          loadSession();
+          // 不在此处调用 loadSession()：revealComplete 状态变化会通过
+          // useCallback 依赖链重建 loadSession，进而触发 useEffect 自动刷新数据
         }}
       />
 
