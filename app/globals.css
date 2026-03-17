@@ -57,6 +57,17 @@
   --shadow-pixel-xl: 8px 8px 0px 0px rgba(0, 0, 0, 0.75);
   --shadow-pixel-inner: inset 3px 3px 0px 0px rgba(0, 0, 0, 0.75);
 
+  /* ===== Retro-Futurism Effects ===== */
+  --neon-purple: #7C3AED;
+  --neon-rose: #F43F5E;
+  --neon-cyan: #22D3EE;
+  --bg-deep: #0F0F23;
+  --text-primary: #E2E8F0;
+
+  --shadow-neon-purple: 0 0 10px rgba(124, 58, 237, 0.5), 0 0 20px rgba(124, 58, 237, 0.3);
+  --shadow-neon-rose: 0 0 10px rgba(244, 63, 94, 0.5), 0 0 20px rgba(244, 63, 94, 0.3);
+  --shadow-neon-cyan: 0 0 10px rgba(34, 211, 238, 0.5), 0 0 20px rgba(34, 211, 238, 0.3);
+
   /* ===== 过渡动画 ===== */
   --transition-pixel: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-pixel-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -92,27 +103,47 @@ body {
 
 /* ===== 列车主题动画 ===== */
 
-/* 星星背景层 */
+/* 星星背景层 - 优化性能与视觉效果（视差滚动） */
 .stars-layer {
+  position: absolute;
+  inset: -200px;
+  background-image:
+    radial-gradient(1.5px 1.5px at 10% 20%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
+    radial-gradient(2px 2px at 30% 60%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 10%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 70% 80%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(2.5px 2.5px at 90% 40%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 85%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(2px 2px at 45% 35%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 65% 55%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 15%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(2px 2px at 25% 45%, rgba(255, 255, 255, 0.9) 0%, transparent 100%);
+  background-size: 400px 400px;
+  animation: star-move 120s linear infinite, twinkle 8s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.stars-layer::after {
+  content: "";
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(1px 1px at 10% 20%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 30% 60%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 50% 10%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 80%, rgba(255, 255, 255, 0.2) 0%, transparent 100%),
-    radial-gradient(1px 1px at 90% 40%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 15% 85%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 45% 35%, rgba(255, 255, 255, 0.2) 0%, transparent 100%),
-    radial-gradient(1px 1px at 65% 55%, rgba(255, 255, 255, 0.35) 0%, transparent 100%),
-    radial-gradient(1px 1px at 85% 15%, rgba(255, 255, 255, 0.25) 0%, transparent 100%),
-    radial-gradient(1px 1px at 25% 45%, rgba(255, 255, 255, 0.45) 0%, transparent 100%);
-  animation: twinkle 8s ease-in-out infinite alternate;
+    radial-gradient(1px 1px at 20% 30%, rgba(255, 215, 0, 0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 60% 70%, rgba(0, 217, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 20%, rgba(255, 110, 199, 0.6) 0%, transparent 100%);
+  background-size: 300px 300px;
+  animation: star-move 80s linear infinite reverse, twinkle 6s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes star-move {
+  from { transform: translateY(0) translateX(0); }
+  to { transform: translateY(-400px) translateX(-100px); }
 }
 
 /* 闪烁 */
 @keyframes twinkle {
-  0%, 100% { opacity: 0.6; }
+  0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
 }
 
@@ -161,49 +192,140 @@ body {
   40% { transform: translateY(-4px); }
 }
 
-/* ===== 深色主题：ArcadeUI 组件覆盖 ===== */
+/* 颜文字弹出 */
+@keyframes emote-pop {
+  0% { transform: scale(0) translateY(10px); opacity: 0; }
+  50% { transform: scale(1.2) translateY(-5px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
 
-/*
- * .train-theme 作用域下，ArcadeUI 组件默认亮色样式不适配深邃星空背景
- * 此处统一覆盖 Card、Badge、ChatBubble、Button 在深色场景下的表现
+@keyframes emote-fade {
+  to { opacity: 0; transform: translateY(-20px); }
+}
+
+/* ===== 深色主题：ArcadeUI 组件彻底覆盖 ===== */
+
+/* 
+ * 强制所有深色场景下的卡片、气泡和按钮适配
  */
-.train-theme {
-  /* Card 深色模式 */
-  & [class*="arcade-card"],
+.train-theme, .bg-\[\#0A0E27\] {
+  /* 基础文字颜色提升 */
+  color: rgba(255, 255, 255, 0.9);
+
+  /* 彻底干掉 ArcadeUI Card 的默认白边和白背景 */
+  & [class*="arcade-card"], 
   & .arcade-card {
-    --tw-bg-opacity: 1;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.9);
+    background: rgba(13, 18, 48, 0.5) !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.8) !important;
   }
 
-  /* Badge 深色适配 — 保持高对比度 */
-  & [class*="arcade-badge"] {
-    font-family: var(--font-pixel);
+  /* 修复 UserProfile 等组件内部可能出现的白色背景 */
+  & div[class*="bg-white"],
+  & .bg-white {
+    background-color: rgba(255, 255, 255, 0.05) !important;
   }
 
-  /* ChatBubble 深色模式 */
-  & .chat-bubble-sent {
-    background: linear-gradient(to bottom, #fafafa, #f0f0f0);
-    border-color: #1a1a1a;
-    color: #1a1a1a;
+  /* 铭牌样式修正：增加对比度 */
+  & .name-tag {
+    background: #1a1f3a !important; /* 坚实的深色背景 */
+    color: white !important; /* 强制白色文字 */
+    border-width: 1px !important;
+    font-weight: bold;
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
   }
 
-  & .chat-bubble-received {
-    background: linear-gradient(to bottom, #e0e0e0, #c0c0c0);
-    border-color: #4a4a4a;
-    color: #1a1a1a;
+  /* 对话气泡文字颜色确保为深色（因为气泡背景是亮的） */
+  & .chat-bubble-pixel {
+    color: #1a1a1a !important;
+    font-weight: 500;
   }
 
-  /* 匿名状态气泡颜色 */
-  & .chat-bubble-anonymous {
-    border-color: rgba(139, 92, 246, 0.3);
+  /* 辅助文字亮度提升 */
+  & .text-white\/30, & .text-white\/40 {
+    color: rgba(255, 255, 255, 0.6) !important;
   }
 
-  /* 揭面状态气泡颜色 */
-  & .chat-bubble-revealed {
-    border-color: rgba(251, 191, 36, 0.3);
+  & .text-white\/20, & .text-white\/15 {
+    color: rgba(255, 255, 255, 0.4) !important;
   }
+
+  /* 修正首页特定的白框问题 */
+  & .arcade-card-content {
+    background: transparent !important;
+  }
+
+  /* 补充铭牌的像素风格样式 */
+  & .name-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border: 2px solid currentColor;
+    background: var(--color-akasha-black);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.5);
+  }
+
+  /* 气泡特殊边角 */
+  & .chat-bubble-pixel {
+    position: relative;
+    image-rendering: pixelated;
+  }
+  
+  & .chat-bubble-pixel::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: inherit;
+    border: inherit;
+    border-top: none;
+    border-right: none;
+    bottom: -5px;
+  }
+  
+  & .chat-bubble-sent::after {
+    right: 12px;
+    transform: rotate(-45deg);
+  }
+  
+  & .chat-bubble-received::after {
+    left: 12px;
+    transform: rotate(-45deg);
+  }
+
+  /* 选中文字样式定制 */
+  ::selection {
+    background: var(--color-star-yellow);
+    color: var(--color-akasha-black);
+  }
+}
+
+/* ===== 像素风滚动条 ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 /* ===== 响应式容器工具类 ===== */
@@ -234,4 +356,70 @@ body {
   .container-responsive {
     max-width: 56rem; /* 896px */
   }
+}
+
+/* ===== CRT & Scanline Effects ===== */
+.crt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+              linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.crt-scanline {
+  width: 100%;
+  height: 100px;
+  z-index: 10000;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.2) 10%, rgba(0, 0, 0, 0.1) 100%);
+  opacity: 0.1;
+  position: fixed;
+  bottom: 100%;
+  animation: scanline 6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scanline {
+  0% { bottom: 100%; }
+  100% { bottom: -100px; }
+}
+
+/* Neon Glow Utilities */
+.neon-glow-purple { text-shadow: var(--shadow-neon-purple); }
+.neon-glow-rose { text-shadow: var(--shadow-neon-rose); }
+.neon-glow-cyan { text-shadow: var(--shadow-neon-cyan); }
+
+.neon-border-purple { 
+  border-color: var(--neon-purple);
+  box-shadow: var(--shadow-neon-purple);
+}
+
+.neon-border-rose { 
+  border-color: var(--neon-rose);
+  box-shadow: var(--shadow-neon-rose);
+}
+
+.neon-border-cyan { 
+  border-color: var(--neon-cyan);
+  box-shadow: var(--shadow-neon-cyan);
+}
+
+/* Glitch Effect */
+.glitch-text {
+  position: relative;
+  animation: glitch-skew 1s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-skew {
+  0% { transform: skew(0deg); }
+  20% { transform: skew(-1deg); }
+  40% { transform: skew(1deg); }
+  60% { transform: skew(-0.5deg); }
+  80% { transform: skew(0.5deg); }
+  100% { transform: skew(0deg); }
 }

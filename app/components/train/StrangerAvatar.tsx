@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * StrangerAvatar - 神秘旅客的匿名头像
- * 揭面前显示全息剪影（ArcadeUI Avatar + fallback），揭面后显示真实头像
- * 保留自定义动画 class（glow-pulse、avatar-reveal）
+ * StrangerAvatar - Retro-Futurism Optimized
  */
 
+import { memo } from "react";
 import { Avatar } from "arcadeui";
+import PixelIcon from "../ui/PixelIcon";
 
 interface StrangerAvatarProps {
   revealed: boolean;
@@ -15,44 +15,46 @@ interface StrangerAvatarProps {
   size?: "sm" | "md" | "lg";
 }
 
-/** 映射到 ArcadeUI Avatar 的 size */
-const AVATAR_SIZE_MAP: Record<string, "sm" | "md" | "lg" | "xl"> = {
-  sm: "sm",
-  md: "md",
-  lg: "lg",
+const SIZE_CLASSES: Record<string, string> = {
+  sm: "w-8 h-8",
+  md: "w-10 h-10",
+  lg: "w-12 h-12",
 };
 
-export default function StrangerAvatar({
+const StrangerAvatar = memo(function StrangerAvatar({
   revealed,
   avatarUrl,
   name,
   size = "md",
 }: StrangerAvatarProps) {
-  const arcadeSize = AVATAR_SIZE_MAP[size] || "md";
+  const sizeClass = SIZE_CLASSES[size] || "w-10 h-10";
 
   if (revealed && avatarUrl) {
     return (
       <Avatar
         src={avatarUrl}
         alt={name || "旅客"}
-        size={arcadeSize}
-        shape="circle"
-        className="!border-2 !border-violet-400/50 animate-[avatar-reveal_1s_ease-out]"
+        size={size}
+        shape="square"
+        className="!border !border-rose-500/50 !shadow-pixel-sm animate-[avatar-reveal_1s_ease-out]"
       />
     );
   }
 
-  // 匿名状态：ArcadeUI Avatar + 面具 fallback + glow 动画
+  // 匿名状态：自定义 Div 模拟 Avatar + PixelIcon
   return (
-    <Avatar
-      fallback="🎭"
-      size={arcadeSize}
-      shape="circle"
-      className={`
-        !bg-gradient-to-br !from-violet-600/30 !to-cyan-600/30
-        !border !border-white/10
-        ${!revealed ? "animate-[glow-pulse_3s_ease-in-out_infinite]" : ""}
-      `}
-    />
+    <div className={`
+      relative group ${sizeClass} overflow-hidden
+      bg-gradient-to-br from-purple-600/20 to-rose-600/20
+      border border-white/10 shadow-pixel-sm
+      flex items-center justify-center
+      ${!revealed ? "animate-[glow-pulse_3s_ease-in-out_infinite]" : ""}
+    `}>
+      <div className="opacity-40 scale-75">
+         <PixelIcon name="icon-mask" size={24} color="white" />
+      </div>
+    </div>
   );
-}
+});
+
+export default StrangerAvatar;

@@ -1,11 +1,7 @@
 "use client";
 
 /**
- * ConversationObserver - 核心观测界面
- * 用户作为"列车长"静默观看 Agent 对话
- * 特点：无输入框、自动推进、实时展示
- *
- * 使用 ArcadeUI ChatBubble + Avatar + Card + Badge
+ * ConversationObserver - Retro-Futurism Optimized
  */
 
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -43,41 +39,37 @@ interface ConversationObserverProps {
 }
 
 const CARRIAGE_NAMES: Record<string, string> = {
-  tech: "技术工坊",
-  art: "艺术长廊",
-  philosophy: "观景台",
-  gaming: "娱乐车厢",
+  tech: "TECH_BAY",
+  art: "ART_GALLERY",
+  philosophy: "VOID_DECK",
+  gaming: "ARCADE_CORE",
 };
 
-const CARRIAGE_ICONS: Record<string, string> = {
-  tech: "icon-wrench",
-  art: "icon-food",
-  philosophy: "icon-scope",
-  gaming: "icon-game",
+const CARRIAGE_COLORS: Record<string, string> = {
+  tech: "#7C3AED",
+  art: "#F43F5E",
+  philosophy: "#22D3EE",
+  gaming: "#FACC15",
 };
 
-export default function ConversationObserver({
-  sessionId,
-}: ConversationObserverProps) {
+export default function ConversationObserver({ sessionId }: ConversationObserverProps) {
   const [session, setSession] = useState<SessionData | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [stranger, setStranger] = useState<StrangerInfo | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [showReveal, setShowReveal] = useState(false);
   const [revealComplete, setRevealComplete] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  
   const scrollRef = useRef<HTMLDivElement>(null);
   const advanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isAdvancingRef = useRef(false);
 
-  // 滚动到底部
   const scrollToBottom = useCallback(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
     }
   }, []);
 
-  // 加载会话数据
   const loadSession = useCallback(async () => {
     try {
       const res = await fetch(`/api/conversation/${sessionId}`);
@@ -86,121 +78,57 @@ export default function ConversationObserver({
         setSession(result.data.session);
         setMessages(result.data.messages);
         if (result.data.stranger) setStranger(result.data.stranger);
-
-        // 检查是否已揭面
-        if (result.data.session.state === "REVEALED" && !revealComplete) {
-          setShowReveal(true);
-        }
+        if (result.data.session.state === "REVEALED" && !revealComplete) setShowReveal(true);
       }
-    } catch (e) {
-      console.error("Failed to load session:", e);
-    }
+    } catch (e) { console.error(e); }
   }, [sessionId, revealComplete]);
 
-  // 推进对话
   const advance = useCallback(async () => {
-    if (isAdvancingRef.current) return;
-    if (!session) return;
+    if (isAdvancingRef.current || !session) return;
     if (session.state === "REVEALED" || session.state === "FADED_OUT") return;
 
     isAdvancingRef.current = true;
     setIsTyping(true);
 
     try {
-      const res = await fetch(`/api/conversation/${sessionId}/advance`, {
-        method: "POST",
-      });
+      const res = await fetch(`/api/conversation/${sessionId}/advance`, { method: "POST" });
       const result = await res.json();
-
       if (result.code === 0 && result.data) {
-        const { message, resonanceTriggered, sessionState } = result.data;
-
-        // 模拟打字延迟后显示消息
-        await new Promise((r) => setTimeout(r, 500 + Math.random() * 1000));
-
-        setMessages((prev) => [...prev, message]);
+        await new Promise((r) => setTimeout(r, 1000 + Math.random() * 1000));
+        setMessages((prev) => [...prev, result.data.message]);
         setIsTyping(false);
-        setSession((prev) =>
-          prev
-            ? {
-                ...prev,
-                currentTurn: prev.currentTurn + 1,
-                state: sessionState,
-              }
-            : prev,
-        );
-
-        if (resonanceTriggered) {
-          // 重新加载以获取完整揭面数据
+        setSession((prev) => prev ? { ...prev, currentTurn: prev.currentTurn + 1, state: result.data.sessionState } : prev);
+        if (result.data.resonanceTriggered) {
           await loadSession();
           setShowReveal(true);
-          return;
         }
-
-        if (sessionState === "FADED_OUT") return;
-      } else if (result.code === 1) {
-        // 会话已结束
-        setSession((prev) =>
-          prev
-            ? { ...prev, state: result.data?.sessionState || "FADED_OUT" }
-            : prev,
-        );
-        setIsTyping(false);
-        return;
       } else {
-        setError(result.message || "推进对话失败");
         setIsTyping(false);
       }
-    } catch (e) {
-      console.error("Advance error:", e);
-      setIsTyping(false);
-    } finally {
-      isAdvancingRef.current = false;
-    }
+    } catch (e) { setIsTyping(false); } finally { isAdvancingRef.current = false; }
   }, [session, sessionId, loadSession]);
 
-  // 初始加载
+  useEffect(() => { loadSession(); }, [loadSession]);
+
   useEffect(() => {
-    loadSession();
-  }, [loadSession]);
+    if (!session || session.state === "REVEALED" || session.state === "FADED_OUT") return;
+    advanceTimerRef.current = setInterval(advance, 5000 + Math.random() * 3000);
+    if (messages.length === 0) advance();
+    return () => { if (advanceTimerRef.current) clearInterval(advanceTimerRef.current); };
+  }, [session, advance, messages.length]);
 
-  // 自动推进对话
-  useEffect(() => {
-    if (!session) return;
-    if (session.state === "REVEALED" || session.state === "FADED_OUT") return;
+  useEffect(() => { scrollToBottom(); }, [messages, isTyping, scrollToBottom]);
 
-    // 3-5秒间隔推进
-    const interval = 3000 + Math.random() * 2000;
-    advanceTimerRef.current = setInterval(advance, interval);
+  if (!session) return (
+    <div className="flex h-full items-center justify-center bg-[#0F0F23]">
+      <div className="font-pixel text-xs text-rose-500 animate-pulse">SYNCING_QUANTUM_LINK...</div>
+    </div>
+  );
 
-    // 首次立即推进（如果没有消息）
-    if (messages.length === 0) {
-      advance();
-    }
-
-    return () => {
-      if (advanceTimerRef.current) clearInterval(advanceTimerRef.current);
-    };
-  }, [session?.state, session?.id, advance, messages.length]);
-
-  // 自动滚动
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping, scrollToBottom]);
-
-  if (!session) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  const carriageName = CARRIAGE_NAMES[session.carriageType] || session.carriageType;
-  const carriageIcon = CARRIAGE_ICONS[session.carriageType] || "icon-train";
+  const carriageColor = CARRIAGE_COLORS[session.carriageType] || "#7C3AED";
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-[#0F0F23] relative font-retro text-white">
       {/* 揭面特效 */}
       <RevelationEffect
         active={showReveal}
@@ -214,100 +142,118 @@ export default function ConversationObserver({
         }}
       />
 
-      {/* 车厢头部 */}
-      <div className="px-4 py-3 border-b-2 border-white/5">
-        <div className="flex items-center justify-between max-w-full md:max-w-2xl lg:max-w-3xl mx-auto">
-          <div className="flex items-center gap-2">
-            <PixelIcon name={carriageIcon} size={20} color="#ffd700" />
-            <span className="font-pixel text-sm font-bold text-white/70">
-              {carriageName}
-            </span>
+      {/* Header Panel */}
+      <div className="px-6 py-4 border-b border-white/5 bg-[#0F0F23]/90 backdrop-blur-xl relative z-20">
+        <div className="flex items-center justify-between container-responsive">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="absolute -inset-1 bg-purple-500/20 blur-sm rounded-lg" />
+              <div className="relative p-2 bg-[#1a1a2e] border border-white/10 rounded-lg">
+                <PixelIcon name="icon-train" size={20} color={carriageColor} className="animate-pulse" />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center gap-3">
+                <span className="font-pixel text-xs font-bold tracking-[0.2em] text-white/90 uppercase neon-glow-purple">
+                  {CARRIAGE_NAMES[session.carriageType] || "UNKNOWN_CAR"}
+                </span>
+                <div className="h-1 w-8 bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-full bg-rose-500 animate-[shimmer_2s_infinite] w-1/2" />
+                </div>
+              </div>
+              <div className="font-pixel text-[8px] text-white/20 mt-1 uppercase tracking-widest">
+                ID: {sessionId.slice(0, 8)} // PASSIVE_OBSERVATION
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-3 font-pixel text-xs text-white/30">
-            <span>
-              {session.currentTurn}/{session.maxTurns} 轮
-            </span>
+          
+          <div className="flex items-center gap-8">
+            <div className="hidden sm:flex flex-col items-end border-r border-white/5 pr-6">
+              <span className="font-pixel text-[8px] text-white/20 mb-1">BUFFER_CAPACITY</span>
+              <div className="flex items-center gap-3">
+                <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden relative">
+                  <div 
+                    className="h-full bg-gradient-to-r from-purple-500 to-rose-500 transition-all duration-1000 shadow-[0_0_8px_#7c3aed]" 
+                    style={{ width: `${(session.currentTurn / session.maxTurns) * 100}%` }} 
+                  />
+                </div>
+                <span className="font-pixel text-[10px] text-white/60 tabular-nums">
+                  {session.currentTurn}/{session.maxTurns}
+                </span>
+              </div>
+            </div>
             {session.resonanceScore !== null && (
-              <span className="text-amber-400/60 flex items-center gap-1">
-                <PixelIcon name="icon-star" size={12} color="currentColor" />
-                {(session.resonanceScore * 100).toFixed(0)}%
-              </span>
+              <div className="flex flex-col items-end">
+                <span className="font-pixel text-[8px] text-rose-500/50 mb-1">RESONANCE</span>
+                <div className="font-pixel text-xs text-rose-500 font-bold neon-glow-rose flex items-center gap-2">
+                  <PixelIcon name="icon-sparkle" size={12} color="currentColor" />
+                  {(session.resonanceScore * 100).toFixed(0)}%
+                </div>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* 对话流 — 响应式居中限宽 */}
+      {/* Message Flow */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth"
+        className="flex-1 overflow-y-auto px-4 py-8 space-y-12 scroll-smooth relative z-10"
       >
-        <div className="max-w-full md:max-w-2xl lg:max-w-3xl mx-auto space-y-4">
-          {/* 开场白 */}
+        <div className="container-responsive space-y-12 pb-24">
           {messages.length === 0 && !isTyping && (
-            <div className="text-center py-12 font-retro text-white/20 text-sm">
-              列车缓缓驶入数据星海...
+            <div className="text-center py-32 animate-pulse flex flex-col items-center">
+              <div className="w-12 h-12 border-2 border-white/5 rounded-full mb-6 flex items-center justify-center border-dashed">
+                <div className="w-2 h-2 bg-rose-500 rounded-full animate-ping" />
+              </div>
+              <div className="font-pixel text-[10px] text-white/10 uppercase tracking-[0.3em]">Waiting for transmission...</div>
             </div>
           )}
 
-          {messages.map((msg) => {
-            const isMyAgent = msg.agentSide === session.mySide;
-            const senderLabel = isMyAgent
-              ? "你的 Agent"
-              : revealComplete && stranger?.name
-                ? stranger.name
-                : `Passenger #${sessionId.slice(-4).toUpperCase()}`;
+          {messages.map((msg, idx) => {
+            const isMySide = msg.agentSide === session.mySide;
+            const isLast = idx === messages.length - 1;
+            const senderName = isMySide ? "OWNER_AGENT" : (revealComplete ? stranger?.name : "ANON_USER");
 
             return (
               <div
                 key={msg.id}
-                className={`flex gap-3 animate-[fade-slide-up_0.4s_ease-out] ${
-                  isMyAgent ? "flex-row-reverse" : ""
-                }`}
+                className={`flex gap-6 animate-[fade-slide-up_0.5s_ease-out] ${isMySide ? "flex-row-reverse" : "flex-row"}`}
               >
-                {/* 头像 */}
-                {isMyAgent ? (
-                  <Avatar
-                    size="sm"
-                    shape="circle"
-                    fallback="AI"
-                    className="!bg-gradient-to-br !from-cyan-500/30 !to-blue-600/30 !border-2 !border-cyan-500/20 shrink-0"
-                  />
-                ) : (
-                  <div className="shrink-0">
-                    <StrangerAvatar
-                      revealed={revealComplete}
-                      avatarUrl={stranger?.avatarUrl}
-                      name={stranger?.name}
-                      size="sm"
-                    />
-                  </div>
-                )}
+                <div className="relative shrink-0">
+                  {isMySide ? (
+                    <div className="relative group">
+                      <div className="absolute -inset-1 bg-purple-500/20 blur-md rounded-lg group-hover:bg-purple-500/40 transition-all" />
+                      <Avatar size="md" shape="square" className="!bg-[#1a1a2e] !border !border-purple-500/30 !shadow-pixel-sm" />
+                      <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-purple-500 border-2 border-[#0F0F23] rounded-sm" />
+                    </div>
+                  ) : (
+                    <div className="relative group">
+                      <div className="absolute -inset-1 bg-rose-500/20 blur-md rounded-lg group-hover:bg-rose-500/40 transition-all" />
+                      <StrangerAvatar revealed={revealComplete} avatarUrl={stranger?.avatarUrl} name={stranger?.name} size="md" />
+                      <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 bg-rose-500 border-2 border-[#0F0F23] rounded-sm" />
+                    </div>
+                  )}
+                </div>
 
-                {/* 消息气泡 — ArcadeUI ChatBubble + 像素风覆盖 */}
-                <div className="max-w-[75%]">
-                  {/* 身份标签 */}
-                  <div
-                    className={`font-pixel text-[10px] mb-1 ${
-                      isMyAgent ? "text-cyan-400/50 text-right" : "text-violet-400/50"
-                    }`}
-                  >
-                    {senderLabel}
+                <div className={`flex flex-col flex-1 max-w-[85%] md:max-w-[75%] ${isMySide ? "items-end" : "items-start"}`}>
+                  <div className={`font-pixel text-[9px] mb-2 flex items-center gap-2 tracking-widest ${isMySide ? "text-purple-400" : "text-rose-400"}`}>
+                    {!isMySide && <div className="w-1.5 h-1.5 bg-current rounded-full" />}
+                    {senderName}
+                    {isMySide && <div className="w-1.5 h-1.5 bg-current rounded-full" />}
                   </div>
+                  
                   <ChatBubble
                     message={msg.content}
-                    isSent={isMyAgent}
-                    timestamp={new Date(msg.timestamp).toLocaleTimeString("zh-CN", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    isSent={isMySide}
+                    timestamp={new Date(msg.timestamp).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}
                     className={`
-                      !font-retro !text-sm !leading-relaxed
-                      ${isMyAgent
-                        ? "chat-bubble-sent !rounded-tr-sm"
-                        : "chat-bubble-received !rounded-tl-sm"
+                      !text-sm !leading-relaxed !p-4 !rounded-xl transition-all duration-300
+                      ${isMySide
+                        ? "!bg-[#1a1a2e]/60 !border !border-purple-500/30 !text-white !rounded-tr-none neon-border-purple"
+                        : "!bg-[#2e1a2e]/60 !border !border-rose-500/30 !text-white !rounded-tl-none neon-border-rose"
                       }
-                      ${revealComplete ? "chat-bubble-revealed" : "chat-bubble-anonymous"}
+                      ${revealComplete && !isMySide ? "!border-amber-500/50 !bg-amber-500/5" : ""}
                     `}
                   />
                 </div>
@@ -315,93 +261,88 @@ export default function ConversationObserver({
             );
           })}
 
-          {/* 打字指示器 */}
           {isTyping && (
-            <div className="flex gap-3">
-              <div className="shrink-0">
-                <StrangerAvatar revealed={false} size="sm" />
-              </div>
-              <div className="bg-gradient-to-b from-[#e0e0e0] to-[#c0c0c0] border-2 border-[#4a4a4a] px-4 py-3 rounded-lg rounded-tl-sm shadow-pixel-sm">
-                <div className="flex gap-1">
-                  <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_infinite]" />
-                  <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_0.2s_infinite]" />
-                  <span className="w-1.5 h-1.5 bg-[#1a1a1a]/50 rounded-sm animate-[bounce_1.4s_ease-in-out_0.4s_infinite]" />
+            <div className="flex gap-6 animate-pulse">
+              <div className="w-10 h-10 rounded-sm bg-white/5 border border-white/10" />
+              <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl rounded-tl-none">
+                <div className="flex gap-1.5 items-center h-full">
+                  <div className="w-1.5 h-1.5 bg-white/20 rounded-full animate-bounce" />
+                  <div className="w-1.5 h-1.5 bg-white/20 rounded-full animate-bounce [animation-delay:0.2s]" />
+                  <div className="w-1.5 h-1.5 bg-white/20 rounded-full animate-bounce [animation-delay:0.4s]" />
                 </div>
               </div>
             </div>
           )}
 
-          {/* 和平散场 */}
-          {session.state === "FADED_OUT" && (
-            <div className="text-center py-8 space-y-3 animate-[fade-in_1s_ease-out]">
-              <div className="font-retro text-white/20 text-sm italic">
-                Passenger #{sessionId.slice(-4).toUpperCase()} 站起身，整理了一下衣领
-              </div>
-              <div className="text-white/15 text-sm italic">
-                向你的 Agent 点了点头
-              </div>
-              <div className="text-white/10 text-sm italic">
-                转身走向车厢连接处，消失在闪烁的星海中
-              </div>
-              <div className="font-pixel text-white/30 text-xs mt-6">
-                相忘于星海 — 对话已结束
-              </div>
-            </div>
-          )}
-
-          {/* 揭面后的信息 — ArcadeUI Card + Badge */}
           {revealComplete && session.state === "REVEALED" && stranger && (
-            <Card
-              variant="outlined"
-              className="!mx-auto !max-w-xs !mt-6 !bg-gradient-to-br !from-amber-500/10 !to-violet-500/10 !border-amber-500/20 !text-center animate-[fade-in_1s_ease-out] !relative !overflow-hidden"
-            >
-              {/* 星星背景 */}
-              <div className="stars-layer opacity-20 absolute inset-0" />
-
-              <div className="relative z-10 p-4">
-                <div className="font-pixel text-amber-400 text-xs font-bold mb-2 flex items-center justify-center gap-1">
-                  <PixelIcon name="icon-sparkle" size={12} color="#ffd700" />
-                  共鸣唱片
-                  <PixelIcon name="icon-sparkle" size={12} color="#ffd700" />
-                </div>
-                <div className="text-white/80 font-pixel text-sm font-bold">
-                  {stranger.name || "神秘旅客"}
-                </div>
-                {session.resonanceScore !== null && (
-                  <div className="mt-1">
-                    <Badge variant="warning" size="sm">
-                      共鸣指数 {(session.resonanceScore * 100).toFixed(1)}%
-                    </Badge>
+            <div className="flex justify-center py-10">
+              <div className="relative group w-full max-w-sm">
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-rose-500 to-amber-500 blur opacity-30 group-hover:opacity-60 transition duration-1000" />
+                <div className="relative bg-[#0F0F23] border border-white/10 p-6 rounded-2xl overflow-hidden shadow-2xl">
+                  {/* Decorative Elements */}
+                  <div className="absolute top-0 right-0 p-4 font-pixel text-[8px] text-white/5 tracking-[0.5em] leading-none">
+                    AKASHA_PASS<br/>RECOVERY_COMPLETE
                   </div>
-                )}
-                {stranger.route && (
-                  <a
-                    href={`https://second.me/${stranger.route}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 mt-3 px-4 py-2 rounded-lg bg-amber-400/10 text-amber-400 font-pixel text-xs hover:bg-amber-400/20 transition-colors border-2 border-amber-400/20"
-                  >
-                    申请连接
-                    <PixelIcon name="icon-arrow-right" size={12} color="currentColor" />
-                  </a>
-                )}
+                  
+                  <div className="flex gap-5 items-center mb-8">
+                    <div className="p-1 border border-amber-500/30 rounded-lg">
+                      <Avatar src={stranger.avatarUrl || undefined} fallback="?" size="lg" shape="square" className="!bg-white/5" />
+                    </div>
+                    <div>
+                      <div className="font-pixel text-base font-bold text-white mb-1 neon-glow-purple">{stranger.name || "UNNAMED"}</div>
+                      <Badge variant="info" className="!bg-amber-500/10 !text-amber-500 !border-amber-500/20 !font-pixel !text-[8px]">DEPTH_SYNCED</Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-6">
+                    <div>
+                      <div className="font-pixel text-[8px] text-white/30 uppercase mb-1">Resonance</div>
+                      <div className="font-pixel text-lg font-bold text-rose-500 neon-glow-rose">{(session.resonanceScore! * 100).toFixed(1)}%</div>
+                    </div>
+                    {stranger.route && (
+                      <div className="flex items-end justify-end">
+                        <a
+                          href={`https://second.me/${stranger.route}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-pixel text-[10px] bg-white text-[#0F0F23] px-4 py-2 rounded-sm hover:bg-rose-500 hover:text-white transition-colors flex items-center gap-2"
+                        >
+                          CONNECT
+                          <PixelIcon name="icon-arrow-right" size={10} color="currentColor" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            </Card>
+            </div>
           )}
         </div>
       </div>
 
-      {/* 底部状态栏 — 绝对无输入框！ */}
-      <div className="px-4 py-3 border-t-2 border-white/5 flex items-center justify-center">
-        <div className="flex items-center gap-2 font-pixel text-xs text-white/25">
-          <PixelIcon name="icon-eye" size={12} color="#00d9ff" className="animate-pulse" />
-          <span>
-            {session.state === "REVEALED"
-              ? "共鸣已达成"
-              : session.state === "FADED_OUT"
-                ? "旅途已结束"
-                : "观测中 — 列车长无需干预"}
-          </span>
+      {/* Footer Status Bar */}
+      <div className="px-6 py-4 border-t border-white/5 bg-[#0F0F23]/90 backdrop-blur-md relative z-20">
+        <div className="container-responsive flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className={`w-2 h-2 rounded-full ${session.state === 'REVEALED' ? 'bg-amber-500' : 'bg-purple-500'} animate-pulse shadow-[0_0_8px_currentColor]`} />
+            <div className="flex flex-col">
+              <span className="font-pixel text-[10px] text-white/80 tracking-widest uppercase">
+                {session.state === "REVEALED" ? "PROTOCOL_STABLE" : "SYNCING_BITSTREAM..."}
+              </span>
+              <span className="font-pixel text-[8px] text-white/20 mt-0.5 uppercase">Passive Observation Mode</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-6">
+             <div className="flex flex-col items-end">
+                <span className="font-pixel text-[8px] text-white/10 uppercase mb-1">Connection State</span>
+                <div className="flex gap-1">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className={`w-1 h-3 rounded-sm ${i < 3 ? 'bg-purple-500/40' : 'bg-white/5'}`} />
+                  ))}
+                </div>
+             </div>
+             <PixelIcon name="icon-scope" size={20} color={session.state === 'REVEALED' ? '#f59e0b' : '#7c3aed'} className="animate-pulse" />
+          </div>
         </div>
       </div>
     </div>

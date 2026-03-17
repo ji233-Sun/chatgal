@@ -1,14 +1,7 @@
 "use client";
 
 /**
- * RevelationEffect - 揭面特效覆盖层
- * 共鸣达成时播放的全屏动画
- *
- * 使用 ArcadeUI Avatar + Card + Badge
- * 保留 4 阶段动画核心逻辑（glow → crack → reveal → done）
- *
- * 幻影模式下显示特殊文案（没有真实对手）
- * 真实匹配下显示对方头像和 SecondMe 链接
+ * RevelationEffect - Retro-Futurism Optimized
  */
 
 import { useEffect, useState, useCallback } from "react";
@@ -35,6 +28,7 @@ export default function RevelationEffect({
   onComplete,
 }: RevelationEffectProps) {
   const [phase, setPhase] = useState<"idle" | "glow" | "crack" | "reveal" | "done">("idle");
+  const [particles, setParticles] = useState<{ id: number; left: string; top: string; animationDelay: string }[]>([]);
 
   const handleDismiss = useCallback(() => {
     if (phase === "done") {
@@ -45,6 +39,15 @@ export default function RevelationEffect({
 
   useEffect(() => {
     if (!active) return;
+
+    setParticles(
+      Array.from({ length: 40 }).map((_, i) => ({
+        id: i,
+        left: `${Math.random() * 100}%`,
+        top: `${70 + Math.random() * 30}%`,
+        animationDelay: `${Math.random() * 2}s`,
+      }))
+    );
 
     setPhase("glow");
     const t1 = setTimeout(() => setPhase("crack"), 1500);
@@ -64,139 +67,137 @@ export default function RevelationEffect({
     <div
       onClick={handleDismiss}
       className={`
-        fixed inset-0 z-50 flex items-center justify-center cursor-pointer
+        fixed inset-0 z-[2000] flex items-center justify-center cursor-pointer
         transition-all duration-1000
-        ${phase === "glow" ? "bg-violet-900/60 backdrop-blur-sm" : ""}
-        ${phase === "crack" ? "bg-violet-900/80 backdrop-blur-md" : ""}
-        ${phase === "reveal" || phase === "done" ? "bg-[#0A0E27]/95 backdrop-blur-lg" : ""}
+        ${phase === "glow" ? "bg-purple-900/40 backdrop-blur-sm" : ""}
+        ${phase === "crack" ? "bg-purple-900/60 backdrop-blur-md" : ""}
+        ${phase === "reveal" || phase === "done" ? "bg-[#0F0F23]/95 backdrop-blur-xl" : ""}
       `}
     >
-      {/* 粒子效果 - 像素方块 */}
+      {/* Particle Effects */}
       {(phase === "crack" || phase === "reveal") && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 30 }).map((_, i) => (
+          {particles.map((particle) => (
             <div
-              key={i}
-              className="absolute w-1 h-1 bg-white/60 rounded-sm animate-[float-up_3s_ease-out_forwards]"
+              key={particle.id}
+              className="absolute w-1 h-1 bg-rose-500/60 rounded-sm animate-[float-up_3s_ease-out_forwards]"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${60 + Math.random() * 40}%`,
-                animationDelay: `${Math.random() * 2}s`,
+                left: particle.left,
+                top: particle.top,
+                animationDelay: particle.animationDelay,
               }}
             />
           ))}
         </div>
       )}
 
-      {/* 共鸣光环 - 像素风格 */}
+      {/* Phase 1: Glow */}
       {phase === "glow" && (
-        <div className="relative">
-          <div className="w-32 h-32 rounded-lg bg-gradient-to-br from-violet-500/50 to-cyan-500/50 border-4 border-violet-400/50 animate-[glow-pulse_1s_ease-in-out_infinite] flex items-center justify-center shadow-pixel-lg">
-            <PixelIcon name="icon-mask" size={48} color="#ffd700" />
+        <div className="relative flex flex-col items-center">
+          <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500/30 to-rose-500/30 border-2 border-purple-500/50 animate-[glow-pulse_1s_ease-in-out_infinite] flex items-center justify-center shadow-pixel-lg">
+            <PixelIcon name="icon-mask" size={32} color="#f43f5e" />
           </div>
-          <p className="font-pixel text-white/60 text-sm text-center mt-6 animate-pulse">
-            检测到深度共鸣...
+          <p className="font-pixel text-rose-500 text-[10px] tracking-[0.3em] uppercase mt-8 animate-pulse neon-glow-rose">
+            SYNC_RESONANCE_DETECTED
           </p>
         </div>
       )}
 
-      {/* 面具碎裂 - 像素风格 */}
+      {/* Phase 2: Crack */}
       {phase === "crack" && (
-        <div className="relative">
-          <div className="w-32 h-32 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 border-4 border-violet-400 flex items-center justify-center animate-[mask-crack_1.5s_ease-out_forwards] shadow-pixel-lg">
-            <PixelIcon name="icon-mask" size={48} color="#ffffff" />
+        <div className="relative flex flex-col items-center">
+          <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-600 to-rose-600 border-2 border-white/20 flex items-center justify-center animate-[mask-crack_1.5s_ease-out_forwards] shadow-pixel-xl">
+            <PixelIcon name="icon-mask" size={32} color="#ffffff" />
           </div>
-          <p className="font-pixel text-white/80 text-sm text-center mt-6">
-            身份面纱正在揭开...
+          <p className="font-pixel text-white/80 text-[10px] tracking-[0.2em] uppercase mt-8">
+            DECRYPTING_IDENTITY_CORE...
           </p>
         </div>
       )}
 
-      {/* 揭面结果 */}
+      {/* Result Phase */}
       {(phase === "reveal" || phase === "done") && (
-        <div className="flex flex-col items-center gap-6 animate-[fade-in_1s_ease-out] px-4">
-          <div className="font-pixel text-amber-400 text-sm font-bold tracking-wider mb-2 flex items-center gap-2">
-            <PixelIcon name="icon-sparkle" size={16} color="#ffd700" />
-            共鸣达成
-            <PixelIcon name="icon-sparkle" size={16} color="#ffd700" />
+        <div className="flex flex-col items-center gap-8 animate-[fade-in_1s_ease-out] px-4 w-full max-w-lg">
+          <div className="font-pixel text-rose-500 text-[10px] font-bold tracking-[0.4em] uppercase mb-2 flex items-center gap-4 bg-rose-500/10 px-8 py-3 border border-rose-500/20 rounded-sm neon-glow-rose">
+            <PixelIcon name="icon-sparkle" size={14} color="currentColor" className="animate-spin" style={{ animationDuration: '4s' }} />
+            PROTOCOL_ESTABLISHED
+            <PixelIcon name="icon-sparkle" size={14} color="currentColor" className="animate-spin" style={{ animationDuration: '4s' }} />
           </div>
 
-          {isPhantom ? (
-            <>
-              {/* 幻影模式 — 没有真实对手 */}
-              <Avatar
-                fallback="✨"
-                size="xl"
-                shape="square"
-                className="!bg-gradient-to-br !from-amber-400/20 !to-violet-500/20 !border-4 !border-amber-400/30"
-              />
-              <div className="text-center max-w-xs">
-                <h3 className="font-pixel text-lg font-bold text-white mb-2">
-                  你的 Agent 展现了真实的自己
-                </h3>
-                <p className="font-retro text-sm text-white/40 leading-relaxed">
-                  这是一次与星海幻影的对话演练。
-                  当另一位真实旅客登上列车时，
-                  你的 Agent 将以同样的真诚与他们相遇。
+          <div className="relative group w-full flex justify-center perspective-1000">
+            <div className={`
+                relative w-full max-w-sm bg-[#1a1a2e] border border-white/10 p-8 rounded-2xl overflow-hidden shadow-2xl
+                ${phase === "reveal" ? "animate-[ticket-fall_1.5s_cubic-bezier(0.68,-0.55,0.265,1.55)]" : ""}
+            `}>
+                <div className="absolute top-0 right-0 p-4 font-pixel text-[8px] text-white/5 tracking-[0.5em] leading-none text-right">
+                    AKASHA_PASS<br/>RECOVERY_COMPLETE
+                </div>
+                
+                <div className="flex gap-6 items-center mb-10">
+                    <div className="p-1 border border-purple-500/30 rounded-lg shadow-pixel-sm">
+                        {isPhantom ? (
+                            <div className="w-16 h-16 flex items-center justify-center font-pixel text-2xl bg-white/5 rounded-sm">?</div>
+                        ) : (
+                            <Avatar
+                                src={stranger?.avatarUrl || undefined}
+                                fallback={(stranger?.name || "U").charAt(0)}
+                                size="lg"
+                                shape="square"
+                                className="!bg-white/5 !w-16 !h-16"
+                            />
+                        )}
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                        <div className="font-pixel text-[8px] text-white/30 uppercase mb-2">Subject Name</div>
+                        <div className="font-pixel text-xl font-bold text-white tracking-tight neon-glow-purple">
+                            {isPhantom ? "VOID_PHANTOM" : (stranger?.name || "UNNAMED_TRAVELER")}
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="border-t border-dashed border-white/10 my-8" />
+                
+                <div className="flex justify-between items-end">
+                    <div className="space-y-2">
+                        <div className="font-pixel text-[8px] text-white/30 uppercase">Resonance Index</div>
+                        <div className="flex items-center gap-3">
+                            <div className="font-pixel text-2xl font-bold text-rose-500 neon-glow-rose">
+                                {resonanceScore ? (resonanceScore * 100).toFixed(1) : "---"}%
+                            </div>
+                            <Badge variant="success" size="sm" className="!bg-rose-500/10 !text-rose-500 !border-rose-500/20 !font-pixel !text-[8px] !px-2">
+                                SYNCED
+                            </Badge>
+                        </div>
+                    </div>
+                    
+                    {!isPhantom && stranger?.route && (
+                        <div className="bg-white text-[#0F0F23] font-pixel text-[10px] px-6 py-3 rounded-sm shadow-pixel hover:bg-rose-500 hover:text-white transition-colors">
+                            VIEW_PROFILE
+                        </div>
+                    )}
+                </div>
+
+                {/* Decorative Bottom Bar */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-rose-500 to-purple-500" />
+            </div>
+          </div>
+
+          <div className="text-center mt-4 space-y-6 animate-[fade-in_1s_ease-out_0.5s_both]">
+            <p className="font-retro text-xs text-white/40 leading-relaxed max-w-xs mx-auto">
+              {isPhantom 
+                ? "Transmission complete. Data phantom detected. True resonance requires biological presence."
+                : "Deep neural sync established. Subject identity parameters fully recovered from the stream."}
+            </p>
+            
+            {phase === "done" && (
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-1 h-12 bg-gradient-to-b from-rose-500/40 to-transparent" />
+                <p className="font-pixel text-rose-500/40 text-[9px] tracking-[0.3em] uppercase animate-pulse">
+                  TAP_TO_RETURN_TERMINAL
                 </p>
               </div>
-            </>
-          ) : (
-            <>
-              {/* 真实匹配 — ArcadeUI Avatar 显示对方信息 */}
-              <Avatar
-                src={stranger?.avatarUrl || undefined}
-                fallback={(stranger?.name || "旅").charAt(0)}
-                alt={stranger?.name || "旅客"}
-                size="xl"
-                shape="square"
-                className="!border-4 !border-amber-400/50 animate-[avatar-reveal_1.5s_ease-out]"
-              />
-
-              <div className="text-center">
-                <h3 className="font-pixel text-xl font-bold text-white">
-                  {stranger?.name || "旅客"}
-                </h3>
-                {stranger?.route && (
-                  <a
-                    href={`https://second.me/${stranger.route}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 font-pixel text-sm text-amber-400/80 hover:text-amber-400 mt-1"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    SecondMe Profile
-                    <PixelIcon name="icon-arrow-right" size={12} color="currentColor" />
-                  </a>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* 共鸣指数 — ArcadeUI Card + Badge */}
-          {resonanceScore !== null && (
-            <Card
-              variant="outlined"
-              className="!mt-2 !bg-white/5 !border-white/10"
-            >
-              <div className="px-6 py-3 text-center">
-                <div className="font-pixel text-xs text-white/40 mb-1">共鸣指数</div>
-                <div className="font-pixel text-2xl font-bold text-center text-amber-400 flex items-center justify-center gap-2">
-                  <PixelIcon name="icon-star" size={20} color="#ffd700" />
-                  <Badge variant="warning" size="lg">
-                    {(resonanceScore * 100).toFixed(1)}%
-                  </Badge>
-                  <PixelIcon name="icon-star" size={20} color="#ffd700" />
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {phase === "done" && (
-            <p className="font-pixel text-white/40 text-xs mt-4 animate-pulse">
-              点击任意位置关闭
-            </p>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -8,6 +8,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import CarriageSelector from "@/app/components/train/CarriageSelector";
 import PixelIcon from "@/app/components/ui/PixelIcon";
 
@@ -49,13 +50,13 @@ export default function TrainStationPage() {
 
       {/* Header */}
       <header className="relative flex items-center justify-between px-6 py-4 border-b-2 border-white/5">
-        <a
+        <Link
           href="/"
           className="inline-flex items-center gap-2 font-pixel text-xs text-white/30 hover:text-white/50 transition-colors"
         >
           <PixelIcon name="icon-arrow-left" size={16} color="currentColor" />
           返回
-        </a>
+        </Link>
         <div className="flex items-center gap-3">
           <PixelIcon name="icon-bell" size={20} color="currentColor" className="text-white/20 hover:text-white/40 transition-colors cursor-pointer" />
           <PixelIcon name="icon-music" size={20} color="currentColor" className="text-white/20 hover:text-white/40 transition-colors cursor-pointer" />
