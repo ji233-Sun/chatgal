@@ -1,103 +1,107 @@
 /**
- * 共鸣判定算法 - 基于对话内容的多维度评估
+ * 共鸣判定算法 - AI Agent 评价 + 启发式 fallback
  */
 
 import { prisma } from "./prisma";
+import { chatWithAgent } from "./secondme";
+import { getValidAccessToken } from "./auth";
 
 export interface ResonanceResult {
   score: number;
   triggered: boolean;
-  metrics: {
-    depthScore: number;
-    engagementScore: number;
-    topicOverlapScore: number;
+  metrics?: {
+    method: "agent" | "heuristic";
+    rawScore?: number;
   };
 }
 
-// 情绪正向标记词
-const POSITIVE_MARKERS = [
-  "哈哈", "确实", "同意", "没错", "太对了", "有趣", "喜欢",
-  "赞同", "完全", "真的", "对啊", "好的", "不错", "厉害",
-];
+const RESONANCE_THRESHOLD = 0.55;
 
-// 深度讨论标记词
-const DEEP_MARKERS = [
-  "为什么", "你觉得", "意味着", "本质上", "核心", "深层",
-  "思考", "假设", "如果", "可能", "根本", "其实", "关键",
-];
+// AI 评审系统提示词
+const EVALUATOR_SYSTEM_PROMPT = `你是一位对话质量评审员。你将阅读两位陌生旅客在列车上的对话，评估他们之间是否产生了真正的思想共鸣。
+
+评估标准（1-10分）：
+1=敷衍客套  3=普通闲聊  5=有一定交流  7=深度共鸣  10=灵魂共振
+
+评判要点：
+- 双方是否在真正倾听和回应，还是各说各话？
+- 讨论是否有深度，还是停留在表面？
+- 是否产生了思想或情感上的连接？
+
+严格输出 JSON：{"score": 数字}`;
 
 /**
- * 计算两组消息的主题重叠度
+ * 使用 UserA 的 Agent 评估对话共鸣
  */
-function calculateTopicOverlap(messagesA: string[], messagesB: string[]): number {
-  const extractKeywords = (texts: string[]): Set<string> => {
+async function evaluateWithAgent(
+  sessionId: string,
+  messages: { content: string; agentSide: string }[],
+): Promise<number> {
+  // 获取 session 的 userAId
+  const session = await prisma.observationSession.findUnique({
+    where: { id: sessionId },
+    select: { userAId: true },
+  });
+  if (!session) throw new Error("Session not found");
+
+  const token = await getValidAccessToken(session.userAId);
+
+  // 格式化对话历史
+  const conversationText = messages
+    .map((m) => `旅客${m.agentSide}: ${m.content}`)
+    .join("\n");
+
+  // 调用 Agent（独立 session，不传 sessionId）
+  const response = await chatWithAgent(
+    token,
+    conversationText,
+    undefined,
+    EVALUATOR_SYSTEM_PROMPT,
+  );
+
+  // 解析 JSON 分数
+  const match = response.content.match(/\{\s*"score"\s*:\s*(\d+(?:\.\d+)?)\s*\}/);
+  if (!match) {
+    throw new Error(`Failed to parse agent score from: ${response.content}`);
+  }
+
+  const rawScore = parseFloat(match[1]);
+  // 归一化 1-10 → 0-1
+  return Math.max(0, Math.min(1, rawScore / 10));
+}
+
+/**
+ * 启发式 fallback - 简化版关键词评分
+ */
+function heuristicScore(
+  messages: { content: string; agentSide: string }[],
+): number {
+  const messagesA = messages.filter((m) => m.agentSide === "A").map((m) => m.content);
+  const messagesB = messages.filter((m) => m.agentSide === "B").map((m) => m.content);
+
+  // 词汇重叠
+  const extract = (texts: string[]) => {
     const words = new Set<string>();
-    const combined = texts.join(" ");
-    const tokens = combined
+    texts.join(" ")
       .split(/[\s,，。.!！?？;；：:、\n""''（）()【】\[\]]+/)
-      .filter((w) => w.length >= 2);
-    tokens.forEach((w) => words.add(w.toLowerCase()));
+      .filter((w) => w.length >= 2)
+      .forEach((w) => words.add(w.toLowerCase()));
     return words;
   };
-
-  const wordsA = extractKeywords(messagesA);
-  const wordsB = extractKeywords(messagesB);
-
-  if (wordsA.size === 0 || wordsB.size === 0) return 0;
-
+  const wordsA = extract(messagesA);
+  const wordsB = extract(messagesB);
   let overlap = 0;
-  for (const word of wordsA) {
-    if (wordsB.has(word)) overlap++;
-  }
+  for (const w of wordsA) if (wordsB.has(w)) overlap++;
+  const overlapScore = wordsA.size && wordsB.size
+    ? Math.min(overlap / Math.min(wordsA.size, wordsB.size), 1)
+    : 0;
 
-  return Math.min(overlap / Math.min(wordsA.size, wordsB.size), 1);
-}
+  // 平均长度
+  const avgLen = messages.reduce((s, m) => s + m.content.length, 0) / messages.length;
+  const lengthScore = Math.min(avgLen / 80, 1);
 
-/**
- * 计算对话深度指标
- */
-function calculateDepthScore(
-  messages: { content: string; agentSide: string }[],
-): number {
-  const avgLength =
-    messages.reduce((sum, m) => sum + m.content.length, 0) / messages.length;
-  const turnCount = messages.length / 2;
-
-  // 深层讨论标记频率
-  const deepCount = messages.reduce((count, m) => {
-    return (
-      count +
-      DEEP_MARKERS.filter((marker) => m.content.includes(marker)).length
-    );
-  }, 0);
-
-  const lengthScore = Math.min(avgLength / 80, 1);
-  const turnScore = Math.min(turnCount / 15, 1);
-  const deepScore = Math.min(deepCount / 10, 1);
-
-  return lengthScore * 0.3 + turnScore * 0.3 + deepScore * 0.4;
-}
-
-/**
- * 计算对话互动/情绪指标
- */
-function calculateEngagementScore(
-  messages: { content: string; agentSide: string }[],
-): number {
-  let positiveCount = 0;
-  let questionCount = 0;
-
-  for (const m of messages) {
-    positiveCount += POSITIVE_MARKERS.filter((marker) =>
-      m.content.includes(marker),
-    ).length;
-    questionCount += (m.content.match(/[?？]/g) || []).length;
-  }
-
-  const positiveScore = Math.min(positiveCount / (messages.length * 0.5), 1);
-  const interactiveScore = Math.min(questionCount / messages.length, 1);
-
-  return positiveScore * 0.5 + interactiveScore * 0.5;
+  // 简单加权（故意保守，让 fallback 也不那么容易触发）
+  return overlapScore * 0.4 + lengthScore * 0.3 + 0.1;
 }
 
 /**
@@ -111,27 +115,22 @@ export async function evaluateResonance(
     orderBy: { timestamp: "asc" },
   });
 
-  const zero: ResonanceResult = {
-    score: 0,
-    triggered: false,
-    metrics: { depthScore: 0, engagementScore: 0, topicOverlapScore: 0 },
-  };
-
+  const zero: ResonanceResult = { score: 0, triggered: false };
   if (messages.length < 10) return zero;
 
-  const messagesA = messages
-    .filter((m) => m.agentSide === "A")
-    .map((m) => m.content);
-  const messagesB = messages
-    .filter((m) => m.agentSide === "B")
-    .map((m) => m.content);
+  let score: number;
+  let method: "agent" | "heuristic";
 
-  const topicOverlapScore = calculateTopicOverlap(messagesA, messagesB);
-  const depthScore = calculateDepthScore(messages);
-  const engagementScore = calculateEngagementScore(messages);
-
-  const score =
-    topicOverlapScore * 0.3 + depthScore * 0.35 + engagementScore * 0.35;
+  try {
+    score = await evaluateWithAgent(sessionId, messages);
+    method = "agent";
+    console.log(`[Resonance] AI agent score for ${sessionId}: ${score.toFixed(3)}`);
+  } catch (err) {
+    console.warn(`[Resonance] Agent evaluation failed, falling back to heuristic:`, err);
+    score = heuristicScore(messages);
+    method = "heuristic";
+    console.log(`[Resonance] Heuristic score for ${sessionId}: ${score.toFixed(3)}`);
+  }
 
   // 更新数据库
   await prisma.observationSession.update({
@@ -139,8 +138,7 @@ export async function evaluateResonance(
     data: { resonanceScore: score },
   });
 
-  // hackathon 门槛适当降低，便于演示（0.55）
-  const triggered = score >= 0.55;
+  const triggered = score >= RESONANCE_THRESHOLD;
 
   if (triggered) {
     await prisma.observationSession.update({
@@ -148,7 +146,6 @@ export async function evaluateResonance(
       data: { state: "REVEALED" },
     });
 
-    // 生成现实通行证
     const session = await prisma.observationSession.findUnique({
       where: { id: sessionId },
     });
@@ -170,11 +167,7 @@ export async function evaluateResonance(
     }
   }
 
-  return {
-    score,
-    triggered,
-    metrics: { depthScore, engagementScore, topicOverlapScore },
-  };
+  return { score, triggered, metrics: { method } };
 }
 
 /**
@@ -189,9 +182,7 @@ async function generateHighlights(sessionId: string): Promise<string> {
   // 选出最长的 3 组对话对作为精华
   const pairs: { a: string; b: string; score: number }[] = [];
   for (let i = 0; i < messages.length - 1; i++) {
-    if (
-      messages[i].agentSide !== messages[i + 1].agentSide
-    ) {
+    if (messages[i].agentSide !== messages[i + 1].agentSide) {
       pairs.push({
         a: messages[i].content,
         b: messages[i + 1].content,
