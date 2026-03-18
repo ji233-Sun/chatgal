@@ -24,6 +24,7 @@ export interface SessionCardData {
   isPhantom: boolean;
   lastMessagePreview: string | null;
   lastMessageAt: string | null;
+  topicTitle?: string | null;
 }
 
 interface SessionHistoryCardProps {
@@ -123,6 +124,13 @@ export default function SessionHistoryCard({
           <div className="font-pixel text-[8px] text-white/20 mb-2">
             {formatRelativeTime(session.lastMessageAt || session.updatedAt)}
           </div>
+
+          {/* 知乎话题标题 */}
+          {session.carriageType === "zhihu_hot" && session.topicTitle && (
+            <p className="font-retro text-[11px] text-[#0084FF]/70 truncate mb-1">
+              {session.topicTitle}
+            </p>
+          )}
 
           {/* 消息预览 */}
           {session.lastMessagePreview && (

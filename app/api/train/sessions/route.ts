@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
         createdAt: true,
         updatedAt: true,
         userBId: true,
+        topicData: true,
         messages: {
           orderBy: { timestamp: "desc" },
           take: 1,
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
             createdAt: s.createdAt,
             updatedAt: s.updatedAt,
             isPhantom: !s.userBId,
+            topicTitle: (s.topicData as Record<string, unknown> | null)?.title as string | null ?? null,
             lastMessagePreview: lastMsg
               ? lastMsg.content.length > 80
                 ? lastMsg.content.slice(0, 80) + "..."

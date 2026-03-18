@@ -8,6 +8,7 @@ export const CARRIAGE_NAMES: Record<string, string> = {
   art: "ART_GALLERY",
   philosophy: "VOID_DECK",
   gaming: "ARCADE_CORE",
+  zhihu_hot: "HOT_FORUM",
 };
 
 export const CARRIAGE_COLORS: Record<string, string> = {
@@ -15,6 +16,7 @@ export const CARRIAGE_COLORS: Record<string, string> = {
   art: "#F43F5E",
   philosophy: "#22D3EE",
   gaming: "#FACC15",
+  zhihu_hot: "#0084FF",
 };
 
 /** 车厢对应的 PixelIcon 名称 */
@@ -23,4 +25,5 @@ export const CARRIAGE_ICONS: Record<string, string> = {
   art: "icon-star",
   philosophy: "icon-scope",
   gaming: "icon-game",
+  zhihu_hot: "icon-sparkle",
 };

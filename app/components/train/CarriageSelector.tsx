@@ -41,6 +41,14 @@ const CARRIAGES = [
     color: "#ffd700",
     bgColor: "rgba(255, 215, 0, 0.1)",
   },
+  {
+    type: "zhihu_hot",
+    name: "热榜议事厅",
+    icon: "icon-sparkle",
+    description: "知乎热榜实时话题讨论",
+    color: "#0084FF",
+    bgColor: "rgba(0, 132, 255, 0.1)",
+  },
 ] as const;
 
 interface CarriageSelectorProps {
@@ -79,8 +87,8 @@ export default function CarriageSelector({
         </p>
       </div>
 
-      {/* 响应式网格：mobile 1列, sm 2列, lg 4列 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl">
+      {/* 响应式网格：mobile 1列, sm 2列, lg 5列 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 w-full max-w-6xl">
         {CARRIAGES.map((carriage) => {
           const isSelected = selected === carriage.type;
           return (

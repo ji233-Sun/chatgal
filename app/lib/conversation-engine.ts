@@ -38,14 +38,52 @@ export const CARRIAGE_TYPES = {
     description: "游戏、动漫、影视",
     color: "#F59E0B",
   },
+  zhihu_hot: {
+    name: "热榜议事厅",
+    emoji: "🔥",
+    description: "知乎热榜实时话题讨论",
+    color: "#0084FF",
+  },
 } as const;
 
 export type CarriageType = keyof typeof CARRIAGE_TYPES;
 
 // ===== Agent 提示词 =====
 
-function getSystemPrompt(carriageType: CarriageType): string {
+/** 话题数据类型（从 zhihu.ts 的 TopicData 对齐） */
+interface TopicDataPayload {
+  title: string;
+  body: string;
+  linkUrl: string;
+  heatScore: number;
+  type: string;
+  topAnswer?: string;
+}
+
+function getSystemPrompt(
+  carriageType: CarriageType,
+  topicData?: TopicDataPayload | null,
+): string {
   const carriage = CARRIAGE_TYPES[carriageType];
+
+  if (carriageType === "zhihu_hot" && topicData) {
+    const parts = [
+      `你正在"阿卡夏漫游列车"上的${carriage.name}${carriage.emoji}中。`,
+      `当前热榜话题：「${topicData.title}」`,
+      `话题背景：${topicData.body}`,
+    ];
+    if (topicData.topAnswer) {
+      parts.push(`热门观点参考：${topicData.topAnswer}`);
+    }
+    parts.push(
+      `你遇到了一位有趣的神秘旅客，你们正在围绕这个热门话题展开讨论。`,
+      `请结合你自己的见解和经历，对该话题发表观点。可以赞同、质疑或补充热门观点。`,
+      `回复保持简洁自然（2-4句话），不要刻意客套或过于正式。`,
+      `不要提及你是 AI 或任何技术性的元描述。你就是你——一个有思想、有个性的旅人。`,
+    );
+    return parts.join("");
+  }
+
   return [
     `你正在"阿卡夏漫游列车"上的${carriage.name}${carriage.emoji}中。`,
     `你遇到了一位有趣的神秘旅客，你们正在关于${carriage.description}的话题上展开自然对话。`,
@@ -59,9 +97,13 @@ function buildAgentMessage(
   carriageType: CarriageType,
   otherMessage: string | null,
   isFirstTurn: boolean,
+  topicData?: TopicDataPayload | null,
 ): string {
   if (isFirstTurn) {
     const carriage = CARRIAGE_TYPES[carriageType];
+    if (carriageType === "zhihu_hot" && topicData) {
+      return `[你刚走进列车的${carriage.name}，坐到了一个靠窗的位置。对面坐着一位神秘旅客。你注意到车厢屏幕上正在播报热门话题「${topicData.title}」。请围绕这个话题主动开启讨论，分享你的看法。简洁自然地打招呼并切入话题。]`;
+    }
     return `[你刚走进列车的${carriage.name}，坐到了一个靠窗的位置。对面坐着一位神秘旅客。请主动开始一个关于${carriage.description}的话题。简洁自然地打招呼并开启对话。]`;
   }
   return `[神秘旅客说] ${otherMessage}`;
@@ -118,14 +160,42 @@ const PHANTOM_RESPONSES: Record<CarriageType, string[]> = {
     "如果你能进入任何一个游戏世界生活一周，你会选哪个？我会选《动物之森》，太治愈了。",
     "游戏里的剧情选择让你纠结过吗？我在《巫师3》里每个选择都要想半天。",
   ],
+  zhihu_hot: [
+    "这个话题最近真的很火，我身边朋友也都在讨论。你怎么看这件事背后的深层原因？",
+    "我觉得热榜上的讨论有时候太情绪化了，但换个角度想，这恰恰说明大家真的在意。你觉得呢？",
+    "说到这个话题，我想起之前看过的一个观点——很多社会议题的核心其实是资源分配问题。你认同吗？",
+    "每次看到这类话题上热搜，我都在想：舆论关注度能不能真正推动改变？还是只是一阵风？",
+    "这个话题让我想到一句话：「真相往往比我们想象的复杂」。你在了解过程中有没有发现什么反直觉的信息？",
+    "我注意到评论区的观点特别分裂，有时候我觉得争论本身比结论更有价值。你怎么看这种分歧？",
+    "如果让你给这个话题写一个总结，你会怎么概括核心矛盾？",
+    "有意思的是，类似的话题每隔一段时间就会换个形式出现。你觉得这说明了什么？",
+    "我比较好奇，你是从什么角度关注这个话题的？是个人经历相关，还是纯粹觉得有趣？",
+    "讨论热点话题最怕的就是信息茧房。你一般会通过什么渠道来获取不同的声音？",
+  ],
 };
 
 function getPhantomResponse(
   carriageType: CarriageType,
   turnIndex: number,
+  topicData?: TopicDataPayload | null,
 ): string {
   const responses = PHANTOM_RESPONSES[carriageType];
-  return responses[turnIndex % responses.length];
+  const staticResponse = responses[turnIndex % responses.length];
+
+  // zhihu_hot 混合策略：偶数轮用静态模板，奇数轮从话题内容提取关键句
+  if (carriageType === "zhihu_hot" && topicData) {
+    if (turnIndex % 2 === 1 && topicData.topAnswer) {
+      // 从热门回答中提取一段作为回复素材
+      const sentences = topicData.topAnswer.split(/[。！？]/);
+      const validSentences = sentences.filter((s) => s.trim().length > 10);
+      if (validSentences.length > 0) {
+        const picked = validSentences[turnIndex % validSentences.length].trim();
+        return `说到「${topicData.title}」，我看到一个观点挺有意思的：「${picked}」——你觉得这个说法站得住脚吗？`;
+      }
+    }
+  }
+
+  return staticResponse;
 }
 
 // ===== 核心引擎 =====
@@ -181,11 +251,14 @@ export async function advanceConversation(
   const carriageType = session.carriageType as CarriageType;
   const isPhantom = !session.userBId;
 
+  // 读取 topicData（zhihu_hot 专用，其他车厢为 null）
+  const topicData = (session.topicData as TopicDataPayload | null) ?? null;
+
   let responseContent: string;
 
   if (nextSide === "B" && isPhantom) {
     // 幻影旅客：使用模板响应
-    responseContent = getPhantomResponse(carriageType, session.currentTurn);
+    responseContent = getPhantomResponse(carriageType, session.currentTurn, topicData);
   } else {
     // 真实 SecondMe Agent
     const userId = nextSide === "A" ? session.userAId : session.userBId!;
@@ -197,13 +270,14 @@ export async function advanceConversation(
       carriageType,
       lastMessage?.content || null,
       isFirstTurn,
+      topicData,
     );
 
     const result = await chatWithAgent(
       token,
       message,
       existingSessionId || undefined,
-      !existingSessionId ? getSystemPrompt(carriageType) : undefined,
+      !existingSessionId ? getSystemPrompt(carriageType, topicData) : undefined,
     );
 
     responseContent = result.content;

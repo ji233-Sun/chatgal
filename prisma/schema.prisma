@@ -39,6 +39,7 @@ model ObservationSession {
   chatSessionB   String?  @map("chat_session_b")
   state          String   @default("ANONYMOUS") // ANONYMOUS, RESONATING, REVEALED, FADED_OUT
   carriageType   String   @map("carriage_type")
+  topicData      Json?    @map("topic_data")     // zhihu_hot 专用：存储话题标题/摘要/链接
   resonanceScore Float?   @map("resonance_score")
   currentTurn    Int      @default(0) @map("current_turn")
   maxTurns       Int      @default(50) @map("max_turns")

@@ -60,6 +60,9 @@ export async function GET(
     const isPhantom = !session.userBId;
     const stranger = mySide === "A" ? session.userB : session.userA;
 
+    // 提取 topicData（zhihu_hot 专用）
+    const topicData = (session.topicData as Record<string, unknown> | null) ?? null;
+
     return NextResponse.json({
       code: 0,
       data: {
@@ -73,6 +76,7 @@ export async function GET(
           isPhantom,
           mySide,
           createdAt: session.createdAt,
+          topicData,
         },
         // 揭面后才显示对方信息
         stranger: isRevealed && !isPhantom

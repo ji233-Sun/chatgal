@@ -27,6 +27,7 @@ interface SessionData {
   resonanceScore: number | null;
   isPhantom: boolean;
   mySide: string;
+  topicData?: { title: string; linkUrl: string } | null;
 }
 
 interface StrangerInfo {
@@ -149,6 +150,11 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
                   <div className="h-full bg-rose-500 animate-[shimmer_2s_infinite] w-1/2" />
                 </div>
               </div>
+              {session.topicData?.title && (
+                <div className="font-retro text-[11px] text-[#0084FF]/80 mt-1 truncate max-w-[200px] sm:max-w-[300px]" title={session.topicData.title}>
+                  {session.topicData.title}
+                </div>
+              )}
               <div className="font-pixel text-[8px] text-white/20 mt-1 uppercase tracking-widest">
                 ID: {sessionId.slice(0, 8)} // PASSIVE_OBSERVATION
               </div>
@@ -271,7 +277,7 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
                   <div className="absolute top-0 right-0 p-4 font-pixel text-[8px] text-white/5 tracking-[0.5em] leading-none">
                     AKASHA_PASS<br/>RECOVERY_COMPLETE
                   </div>
-                  
+
                   <div className="flex gap-5 items-center mb-8">
                     <div className="p-1 border border-amber-500/30 rounded-lg">
                       <Avatar src={stranger.avatarUrl || undefined} fallback="?" size="lg" shape="square" className="!bg-white/5" />
@@ -281,7 +287,7 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
                       <Badge variant="info" className="!bg-amber-500/10 !text-amber-500 !border-amber-500/20 !font-pixel !text-[8px]">DEPTH_SYNCED</Badge>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-6">
                     <div>
                       <div className="font-pixel text-[8px] text-white/30 uppercase mb-1">Resonance</div>
@@ -303,6 +309,22 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* 知乎原文链接（会话结束后显示） */}
+          {(session.state === "REVEALED" || session.state === "FADED_OUT") && session.topicData?.linkUrl && (
+            <div className="flex justify-center py-4">
+              <a
+                href={session.topicData.linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-pixel text-[11px] text-[#0084FF] hover:text-[#0084FF]/80 border border-[#0084FF]/30 px-5 py-2.5 rounded-lg hover:bg-[#0084FF]/10 transition-all flex items-center gap-2"
+              >
+                <PixelIcon name="icon-sparkle" size={12} color="#0084FF" />
+                查看知乎原文
+                <PixelIcon name="icon-arrow-right" size={10} color="#0084FF" />
+              </a>
             </div>
           )}
         </div>
