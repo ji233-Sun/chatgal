@@ -49,6 +49,14 @@ const CARRIAGES = [
     color: "#0084FF",
     bgColor: "rgba(0, 132, 255, 0.1)",
   },
+  {
+    type: "free_topic",
+    name: "自由漫谈",
+    icon: "icon-chat",
+    description: "Agent自主选择最想聊的话题",
+    color: "#14B8A6",
+    bgColor: "rgba(20, 184, 166, 0.1)",
+  },
 ] as const;
 
 interface CarriageSelectorProps {
@@ -88,7 +96,7 @@ export default function CarriageSelector({
       </div>
 
       {/* 响应式网格：mobile 1列, sm 2列, lg 5列 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 w-full max-w-6xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 w-full max-w-4xl">
         {CARRIAGES.map((carriage) => {
           const isSelected = selected === carriage.type;
           return (

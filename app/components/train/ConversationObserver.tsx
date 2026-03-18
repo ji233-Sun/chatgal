@@ -89,9 +89,21 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
       const result = await res.json();
       if (result.code === 0 && result.data) {
         await new Promise((r) => setTimeout(r, 1000 + Math.random() * 1000));
-        setMessages((prev) => [...prev, result.data.message]);
+        setMessages((prev) => {
+          // 去重：防止并发 advance 导致同一消息被添加两次
+          if (prev.some((m) => m.id === result.data.message.id)) return prev;
+          return [...prev, result.data.message];
+        });
         setIsTyping(false);
-        setSession((prev) => prev ? { ...prev, currentTurn: prev.currentTurn + 1, state: result.data.sessionState } : prev);
+        setSession((prev) => {
+          if (!prev) return prev;
+          const updated = { ...prev, currentTurn: prev.currentTurn + 1, state: result.data.sessionState };
+          // free_topic 首轮：从 advance 响应同步话题数据
+          if (result.data.topicData && !prev.topicData) {
+            updated.topicData = result.data.topicData;
+          }
+          return updated;
+        });
         if (result.data.resonanceTriggered) {
           await loadSession();
           setShowReveal(true);
@@ -173,7 +185,7 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
                 </div>
               </div>
               {session.topicData?.title && (
-                <div className="font-retro text-[11px] text-[#0084FF]/80 mt-1 truncate max-w-[200px] sm:max-w-[300px]" title={session.topicData.title}>
+                <div className="font-retro text-[11px] mt-1 truncate max-w-[200px] sm:max-w-[300px]" style={{ color: `${carriageColor}CC` }} title={session.topicData.title}>
                   {session.topicData.title}
                 </div>
               )}
@@ -233,11 +245,13 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
 
         <div className="container-responsive space-y-12 pb-24">
           {messages.length === 0 && !isTyping && (
-            <div className="text-center py-32 animate-pulse flex flex-col items-center">
-              <div className="w-12 h-12 border-2 border-white/5 rounded-full mb-6 flex items-center justify-center border-dashed">
-                <div className="w-2 h-2 bg-rose-500 rounded-full animate-ping" />
+            <div className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
+              <div className="animate-pulse flex flex-col items-center">
+                <div className="w-12 h-12 border-2 border-white/5 rounded-full mb-6 flex items-center justify-center border-dashed">
+                  <div className="w-2 h-2 bg-rose-500 rounded-full animate-ping" />
+                </div>
+                <div className="font-pixel text-[10px] text-white/10 uppercase tracking-[0.3em]">Waiting for transmission...</div>
               </div>
-              <div className="font-pixel text-[10px] text-white/10 uppercase tracking-[0.3em]">Waiting for transmission...</div>
             </div>
           )}
 
@@ -259,7 +273,12 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
             );
           })}
 
-          {isTyping && <TypingIndicator isMySide={false} />}
+          {isTyping && messages.length === 0 && (
+            <div className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
+              <TypingIndicator isMySide={false} />
+            </div>
+          )}
+          {isTyping && messages.length > 0 && <TypingIndicator isMySide={false} />}
 
           {revealComplete && session.state === "REVEALED" && stranger && (
             <div className="flex justify-center py-10">

@@ -44,20 +44,27 @@ export const CARRIAGE_TYPES = {
     description: "知乎热榜实时话题讨论",
     color: "#0084FF",
   },
+  free_topic: {
+    name: "自由漫谈",
+    emoji: "💭",
+    description: "Agent自主选择最想聊的话题",
+    color: "#14B8A6",
+  },
 } as const;
 
 export type CarriageType = keyof typeof CARRIAGE_TYPES;
 
 // ===== Agent 提示词 =====
 
-/** 话题数据类型（从 zhihu.ts 的 TopicData 对齐） */
+/** 话题数据类型（从 zhihu.ts 的 TopicData 对齐，free_topic 复用 title 字段） */
 interface TopicDataPayload {
   title: string;
-  body: string;
-  linkUrl: string;
-  heatScore: number;
-  type: string;
+  body?: string;
+  linkUrl?: string;
+  heatScore?: number;
+  type?: string;
   topAnswer?: string;
+  generatedBy?: string; // free_topic 专用：话题由哪方 Agent 生成
 }
 
 function getSystemPrompt(
@@ -84,6 +91,17 @@ function getSystemPrompt(
     return parts.join("");
   }
 
+  if (carriageType === "free_topic" && topicData) {
+    return [
+      `你正在"阿卡夏漫游列车"上的${carriage.name}${carriage.emoji}中。`,
+      `你选择了一个话题：「${topicData.title}」。`,
+      `你遇到了一位有趣的神秘旅客，你们正在围绕这个话题展开自然对话。`,
+      `请围绕这个话题分享你真实的想法、经历和见解。`,
+      `回复保持简洁自然（2-4句话），不要刻意客套或过于正式。`,
+      `不要提及你是 AI 或任何技术性的元描述。你就是你——一个有思想、有个性的旅人。`,
+    ].join("");
+  }
+
   return [
     `你正在"阿卡夏漫游列车"上的${carriage.name}${carriage.emoji}中。`,
     `你遇到了一位有趣的神秘旅客，你们正在关于${carriage.description}的话题上展开自然对话。`,
@@ -103,6 +121,9 @@ function buildAgentMessage(
     const carriage = CARRIAGE_TYPES[carriageType];
     if (carriageType === "zhihu_hot" && topicData) {
       return `[你刚走进列车的${carriage.name}，坐到了一个靠窗的位置。对面坐着一位神秘旅客。你注意到车厢屏幕上正在播报热门话题「${topicData.title}」。请围绕这个话题主动开启讨论，分享你的看法。简洁自然地打招呼并切入话题。]`;
+    }
+    if (carriageType === "free_topic" && topicData) {
+      return `[你刚走进列车的${carriage.name}，坐到了一个靠窗的位置。对面坐着一位神秘旅客。你之前选好了想聊的话题「${topicData.title}」。请围绕这个话题主动开启对话，分享你的想法。简洁自然地打招呼并切入话题。]`;
     }
     return `[你刚走进列车的${carriage.name}，坐到了一个靠窗的位置。对面坐着一位神秘旅客。请主动开始一个关于${carriage.description}的话题。简洁自然地打招呼并开启对话。]`;
   }
@@ -172,6 +193,18 @@ const PHANTOM_RESPONSES: Record<CarriageType, string[]> = {
     "我比较好奇，你是从什么角度关注这个话题的？是个人经历相关，还是纯粹觉得有趣？",
     "讨论热点话题最怕的就是信息茧房。你一般会通过什么渠道来获取不同的声音？",
   ],
+  free_topic: [
+    "这个话题挺有意思的，我之前也想过类似的问题。你是什么契机开始关注这个方向的？",
+    "我觉得你说的很有道理。不过我有个不同的角度——你觉得这件事有没有另一面？",
+    "说实话，这个话题我了解不多，但听你这么一说，我开始觉得值得深入了解一下。",
+    "你提到的这个点让我联想到另一件事——不知道你有没有注意到它们之间的关联？",
+    "我特别喜欢和有独立思考的人聊天。你平时除了这个，还会关注什么领域？",
+    "嗯，你的观点让我重新思考了一些东西。有时候换个视角确实能看到不一样的风景。",
+    "这个话题可以聊得很深。如果不考虑现实限制，你觉得理想状态应该是什么样的？",
+    "我注意到你说话的方式挺有特点的——既感性又理性。这个话题对你来说是不是特别有感触？",
+    "如果要给一个完全不了解这个话题的人解释，你会怎么用最简单的话说清楚？",
+    "聊到这里我突然觉得，人和人的对话最珍贵的地方就是能互相启发。你觉得呢？",
+  ],
 };
 
 function getPhantomResponse(
@@ -200,6 +233,48 @@ function getPhantomResponse(
 
 // ===== 核心引擎 =====
 
+/**
+ * 为 free_topic 车厢生成话题
+ * 调用 Agent A 的 SecondMe API，让 Agent 自主选择想聊的话题
+ */
+async function generateFreeTopic(
+  userAId: string,
+  sessionId: string,
+): Promise<TopicDataPayload> {
+  const token = await getValidAccessToken(userAId);
+
+  const topicSystemPrompt = [
+    "你是一个有趣的旅人，正在登上一列神秘的列车。",
+    "在这趟旅途中，你将遇到一位素未谋面的神秘旅客。",
+    "请想一个你现在最想聊的话题——可以是任何方向：生活感悟、兴趣爱好、最近的思考、某个有趣的现象、一段难忘的经历...",
+    "用一句简短的话（10-20字）概括这个话题。只输出话题本身，不要加任何前缀或解释。",
+  ].join("");
+
+  const topicMessage = "请告诉我，你现在最想和一个陌生人聊什么话题？";
+
+  // 独立 chat session，不传 sessionId，不影响后续正式对话
+  const result = await chatWithAgent(token, topicMessage, undefined, topicSystemPrompt);
+
+  // 清理 Agent 返回内容，取第一行作为话题标题
+  const rawTitle = result.content.trim().split("\n")[0]
+    .replace(/^[「"'【《]/, "")
+    .replace(/[」"'】》]$/, "")
+    .trim();
+
+  const topicData: TopicDataPayload = {
+    title: rawTitle || "一些随想",
+    generatedBy: "A",
+  };
+
+  // 存入 session
+  await prisma.observationSession.update({
+    where: { id: sessionId },
+    data: { topicData: JSON.parse(JSON.stringify(topicData)) },
+  });
+
+  return topicData;
+}
+
 export interface AdvanceResult {
   message: {
     id: string;
@@ -209,6 +284,7 @@ export interface AdvanceResult {
   };
   resonanceTriggered: boolean;
   sessionState: string;
+  topicData?: TopicDataPayload | null;
 }
 
 /**
@@ -251,8 +327,13 @@ export async function advanceConversation(
   const carriageType = session.carriageType as CarriageType;
   const isPhantom = !session.userBId;
 
-  // 读取 topicData（zhihu_hot 专用，其他车厢为 null）
-  const topicData = (session.topicData as TopicDataPayload | null) ?? null;
+  // 读取 topicData（zhihu_hot / free_topic 使用，其他车厢为 null）
+  let topicData = (session.topicData as TopicDataPayload | null) ?? null;
+
+  // free_topic 首轮：先调 Agent A 生成话题
+  if (isFirstTurn && carriageType === "free_topic" && !topicData) {
+    topicData = await generateFreeTopic(session.userAId, sessionId);
+  }
 
   let responseContent: string;
 
@@ -340,5 +421,6 @@ export async function advanceConversation(
       : updatedSession.currentTurn >= session.maxTurns
         ? "FADED_OUT"
         : "ANONYMOUS",
+    topicData,
   };
 }
