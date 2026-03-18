@@ -19,11 +19,14 @@ export async function GET(request: NextRequest) {
     }
 
     const stateFilter = request.nextUrl.searchParams.get("state");
+    const roleFilter = request.nextUrl.searchParams.get("role");
     const validStates = ["ANONYMOUS", "REVEALED", "FADED_OUT", "ABANDONED"];
-    const where: Record<string, unknown> = {
-      userAId: userId,
-    };
-    if (stateFilter && validStates.includes(stateFilter)) {
+
+    const where: Record<string, unknown> = roleFilter === "B"
+      ? { userBId: userId, state: "REVEALED" }
+      : { userAId: userId };
+
+    if (roleFilter !== "B" && stateFilter && validStates.includes(stateFilter)) {
       where.state = stateFilter;
     }
 

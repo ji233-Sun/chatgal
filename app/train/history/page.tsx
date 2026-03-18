@@ -14,13 +14,14 @@ import SessionHistoryCard, {
 import PixelIcon from "@/app/components/ui/PixelIcon";
 import ConfirmDialog from "@/app/components/ui/ConfirmDialog";
 
-type FilterTab = "ALL" | "REVEALED" | "FADED_OUT" | "ANONYMOUS";
+type FilterTab = "ALL" | "REVEALED" | "FADED_OUT" | "ANONYMOUS" | "INVITED";
 
 const TABS: { key: FilterTab; label: string }[] = [
   { key: "ALL", label: "全部" },
   { key: "REVEALED", label: "共鸣" },
   { key: "FADED_OUT", label: "消逝" },
   { key: "ANONYMOUS", label: "进行中" },
+  { key: "INVITED", label: "被邀请" },
 ];
 
 /** 各 tab 空态文案 */
@@ -29,6 +30,7 @@ const EMPTY_MESSAGES: Record<FilterTab, { text: string; icon: string }> = {
   REVEALED: { text: "还没有共鸣记录，继续探索吧", icon: "icon-sparkle" },
   FADED_OUT: { text: "没有消逝的旅途", icon: "icon-star-empty" },
   ANONYMOUS: { text: "没有进行中的旅途", icon: "icon-scope" },
+  INVITED: { text: "还没有被邀请参与的共鸣旅途", icon: "icon-sparkle" },
 };
 
 export default function HistoryPage() {
@@ -43,7 +45,11 @@ export default function HistoryPage() {
   const fetchSessions = useCallback(async (tab: FilterTab) => {
     setLoading(true);
     try {
-      const param = tab === "ALL" ? "" : `?state=${tab}`;
+      const param = tab === "INVITED"
+        ? "?role=B"
+        : tab === "ALL"
+        ? ""
+        : `?state=${tab}`;
       const res = await fetch(`/api/train/sessions${param}`);
       const result = await res.json();
       if (result.code === 0) {
