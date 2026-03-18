@@ -48,3 +48,5 @@ next-env.d.ts
 
 /app/generated/prisma
 .ace-tool/
+
+.playwright-mcp
