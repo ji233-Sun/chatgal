@@ -12,6 +12,7 @@ import SessionHistoryCard, {
   type SessionCardData,
 } from "@/app/components/train/SessionHistoryCard";
 import PixelIcon from "@/app/components/ui/PixelIcon";
+import ConfirmDialog from "@/app/components/ui/ConfirmDialog";
 
 type FilterTab = "ALL" | "REVEALED" | "FADED_OUT" | "ANONYMOUS";
 
@@ -35,6 +36,9 @@ export default function HistoryPage() {
   const [activeTab, setActiveTab] = useState<FilterTab>("ALL");
   const [sessions, setSessions] = useState<SessionCardData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAbandoning, setIsAbandoning] = useState(false);
+  const [showAbandonAllConfirm, setShowAbandonAllConfirm] = useState(false);
+  const [abandoningSessionId, setAbandoningSessionId] = useState<string | null>(null);
 
   const fetchSessions = useCallback(async (tab: FilterTab) => {
     setLoading(true);
@@ -51,6 +55,35 @@ export default function HistoryPage() {
       setLoading(false);
     }
   }, []);
+
+  const handleAbandonAll = useCallback(async () => {
+    setIsAbandoning(true);
+    setShowAbandonAllConfirm(false);
+    try {
+      const res = await fetch("/api/train/abandon-all", { method: "POST" });
+      const result = await res.json();
+      if (result.code === 0) {
+        await fetchSessions(activeTab);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsAbandoning(false);
+    }
+  }, [activeTab, fetchSessions]);
+
+  const handleAbandonOne = useCallback(async (sessionId: string) => {
+    setAbandoningSessionId(null);
+    try {
+      const res = await fetch(`/api/conversation/${sessionId}/abandon`, { method: "POST" });
+      const result = await res.json();
+      if (result.code === 0) {
+        await fetchSessions(activeTab);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [activeTab, fetchSessions]);
 
   useEffect(() => {
     fetchSessions(activeTab);
@@ -86,24 +119,35 @@ export default function HistoryPage() {
 
       {/* Filter Tabs */}
       <div className="px-6 py-4 border-b border-white/5">
-        <div className="flex gap-2 max-w-2xl mx-auto">
-          {TABS.map((tab) => (
+        <div className="flex items-center justify-between gap-4 max-w-2xl mx-auto">
+          <div className="flex gap-2">
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => handleTabChange(tab.key)}
+                className={`
+                  font-pixel text-[10px] px-3 py-1.5 rounded-sm border transition-all
+                  ${
+                    activeTab === tab.key
+                      ? "border-purple-500/50 bg-purple-500/10 text-purple-400 shadow-[0_0_8px_rgba(124,58,237,0.2)]"
+                      : "border-white/5 bg-transparent text-white/30 hover:text-white/50 hover:border-white/10"
+                  }
+                `}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          {sessions.some(s => s.state === "ANONYMOUS") && (
             <button
-              key={tab.key}
-              type="button"
-              onClick={() => handleTabChange(tab.key)}
-              className={`
-                font-pixel text-[10px] px-3 py-1.5 rounded-sm border transition-all
-                ${
-                  activeTab === tab.key
-                    ? "border-purple-500/50 bg-purple-500/10 text-purple-400 shadow-[0_0_8px_rgba(124,58,237,0.2)]"
-                    : "border-white/5 bg-transparent text-white/30 hover:text-white/50 hover:border-white/10"
-                }
-              `}
+              onClick={() => setShowAbandonAllConfirm(true)}
+              disabled={isAbandoning}
+              className="font-pixel text-[10px] text-white/30 hover:text-rose-500 transition-colors disabled:opacity-50 border border-white/5 hover:border-rose-500/30 px-3 py-1.5 rounded-sm"
             >
-              {tab.label}
+              {isAbandoning ? "..." : "放弃全部"}
             </button>
-          ))}
+          )}
         </div>
       </div>
 
@@ -159,11 +203,36 @@ export default function HistoryPage() {
                 key={s.id}
                 session={s}
                 onClick={handleCardClick}
+                onAbandon={(id) => setAbandoningSessionId(id)}
               />
             ))
           )}
         </div>
       </main>
+
+      {/* 放弃单个旅途确认对话框 */}
+      <ConfirmDialog
+        open={abandoningSessionId !== null}
+        title="确定要放弃这次旅途吗？"
+        message="放弃后将无法继续当前对话"
+        confirmText="放弃"
+        cancelText="取消"
+        variant="danger"
+        onConfirm={() => abandoningSessionId && handleAbandonOne(abandoningSessionId)}
+        onCancel={() => setAbandoningSessionId(null)}
+      />
+
+      {/* 放弃全部旅途确认对话框 */}
+      <ConfirmDialog
+        open={showAbandonAllConfirm}
+        title="确定要放弃所有进行中的旅途吗？"
+        message={`将放弃 ${sessions.filter(s => s.state === "ANONYMOUS").length} 个进行中的旅途`}
+        confirmText="全部放弃"
+        cancelText="取消"
+        variant="danger"
+        onConfirm={handleAbandonAll}
+        onCancel={() => setShowAbandonAllConfirm(false)}
+      />
     </div>
   );
 }

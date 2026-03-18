@@ -19,9 +19,9 @@ export async function GET(request: NextRequest) {
     }
 
     const stateFilter = request.nextUrl.searchParams.get("state");
-    const validStates = ["ANONYMOUS", "REVEALED", "FADED_OUT"];
+    const validStates = ["ANONYMOUS", "REVEALED", "FADED_OUT", "ABANDONED"];
     const where: Record<string, unknown> = {
-      OR: [{ userAId: userId }, { userBId: userId }],
+      userAId: userId,
     };
     if (stateFilter && validStates.includes(stateFilter)) {
       where.state = stateFilter;

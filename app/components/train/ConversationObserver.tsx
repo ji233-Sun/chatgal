@@ -12,6 +12,7 @@ import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import ResonanceVisualizer from "./ResonanceVisualizer";
 import PixelIcon from "../ui/PixelIcon";
+import ConfirmDialog from "../ui/ConfirmDialog";
 import { CARRIAGE_NAMES, CARRIAGE_COLORS } from "@/app/lib/carriage";
 
 interface Message {
@@ -50,7 +51,9 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
   const [isTyping, setIsTyping] = useState(false);
   const [showReveal, setShowReveal] = useState(false);
   const [revealComplete, setRevealComplete] = useState(false);
-  
+  const [isAbandoning, setIsAbandoning] = useState(false);
+  const [showAbandonConfirm, setShowAbandonConfirm] = useState(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const advanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isAdvancingRef = useRef(false);
@@ -98,6 +101,22 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
       }
     } catch (e) { setIsTyping(false); } finally { isAdvancingRef.current = false; }
   }, [session, sessionId, loadSession]);
+
+  const handleAbandon = useCallback(async () => {
+    setIsAbandoning(true);
+    setShowAbandonConfirm(false);
+    try {
+      const res = await fetch(`/api/conversation/${sessionId}/abandon`, { method: "POST" });
+      const result = await res.json();
+      if (result.code === 0) {
+        window.location.href = "/train/history";
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsAbandoning(false);
+    }
+  }, [sessionId]);
 
   useEffect(() => { loadSession(); }, [loadSession]);
 
@@ -165,13 +184,22 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
           </div>
           
           <div className="flex items-center gap-8">
+            {session.state === "ANONYMOUS" && (
+              <button
+                onClick={() => setShowAbandonConfirm(true)}
+                disabled={isAbandoning}
+                className="font-pixel text-[10px] text-white/40 hover:text-rose-500 transition-colors disabled:opacity-50"
+              >
+                {isAbandoning ? "..." : "放弃"}
+              </button>
+            )}
             <div className="hidden sm:flex flex-col items-end border-r border-white/5 pr-6">
               <span className="font-pixel text-[8px] text-white/20 mb-1">BUFFER_CAPACITY</span>
               <div className="flex items-center gap-3">
                 <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden relative">
-                  <div 
-                    className="h-full bg-gradient-to-r from-purple-500 to-rose-500 transition-all duration-1000 shadow-[0_0_8px_#7c3aed]" 
-                    style={{ width: `${(session.currentTurn / session.maxTurns) * 100}%` }} 
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-500 to-rose-500 transition-all duration-1000 shadow-[0_0_8px_#7c3aed]"
+                    style={{ width: `${(session.currentTurn / session.maxTurns) * 100}%` }}
                   />
                 </div>
                 <span className="font-pixel text-[10px] text-white/60 tabular-nums">
@@ -320,6 +348,18 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
           </div>
         </div>
       </div>
+
+      {/* 放弃确认对话框 */}
+      <ConfirmDialog
+        open={showAbandonConfirm}
+        title="确定要放弃这次旅途吗？"
+        message="放弃后将无法继续当前对话"
+        confirmText="放弃"
+        cancelText="取消"
+        variant="danger"
+        onConfirm={handleAbandon}
+        onCancel={() => setShowAbandonConfirm(false)}
+      />
     </div>
   );
 }

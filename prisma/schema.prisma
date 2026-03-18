@@ -37,7 +37,7 @@ model ObservationSession {
   userBId        String?  @map("user_b_id") // null = phantom mode
   chatSessionA   String?  @map("chat_session_a") // SecondMe chat session ID
   chatSessionB   String?  @map("chat_session_b")
-  state          String   @default("ANONYMOUS") // ANONYMOUS, RESONATING, REVEALED, FADED_OUT
+  state          String   @default("ANONYMOUS") // ANONYMOUS, RESONATING, REVEALED, FADED_OUT, ABANDONED
   carriageType   String   @map("carriage_type")
   topicData      Json?    @map("topic_data")     // zhihu_hot 专用：存储话题标题/摘要/链接
   resonanceScore Float?   @map("resonance_score")

@@ -30,6 +30,7 @@ export interface SessionCardData {
 interface SessionHistoryCardProps {
   session: SessionCardData;
   onClick: (id: string) => void;
+  onAbandon?: (id: string) => void;
 }
 
 /** 状态徽章配置 */
@@ -51,6 +52,10 @@ const STATE_BADGES: Record<
     className:
       "bg-purple-500/15 text-purple-400 border-purple-500/30 animate-pulse",
   },
+  ABANDONED: {
+    label: "ABANDONED",
+    className: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+  },
 };
 
 function formatRelativeTime(dateStr: string): string {
@@ -68,6 +73,7 @@ function formatRelativeTime(dateStr: string): string {
 export default function SessionHistoryCard({
   session,
   onClick,
+  onAbandon,
 }: SessionHistoryCardProps) {
   const color = CARRIAGE_COLORS[session.carriageType] || "#7C3AED";
   const name = CARRIAGE_NAMES[session.carriageType] || "UNKNOWN_CAR";
@@ -78,12 +84,16 @@ export default function SessionHistoryCard({
     ? (session.currentTurn / session.maxTurns) * 100
     : 0;
 
+  const handleAbandonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onAbandon) onAbandon(session.id);
+  };
+
   return (
-    <button
-      type="button"
+    <div
       onClick={() => onClick(session.id)}
       className={`
-        w-full text-left rounded-lg border p-4 transition-all duration-300
+        w-full text-left rounded-lg border p-4 transition-all duration-300 cursor-pointer
         bg-[#0F0F23]/60 backdrop-blur-sm
         hover:scale-[1.02] hover:bg-[#0F0F23]/80
         focus:outline-none focus:ring-1 focus:ring-purple-500/50
@@ -172,17 +182,25 @@ export default function SessionHistoryCard({
 
       {/* 进行中卡片底部提示 */}
       {isActive && session.currentTurn > 0 && (
-        <div className="mt-3 pt-2 border-t border-purple-500/10 flex items-center justify-end gap-1">
-          <span className="font-pixel text-[10px] text-purple-400">
-            TAP_TO_CONTINUE
-          </span>
-          <PixelIcon
-            name="icon-arrow-right"
-            size={10}
-            color="#a855f7"
-          />
+        <div className="mt-3 pt-2 border-t border-purple-500/10 flex items-center justify-between">
+          <button
+            onClick={handleAbandonClick}
+            className="font-pixel text-[10px] text-white/30 hover:text-rose-500 transition-colors"
+          >
+            放弃
+          </button>
+          <div className="flex items-center gap-1">
+            <span className="font-pixel text-[10px] text-purple-400">
+              TAP_TO_CONTINUE
+            </span>
+            <PixelIcon
+              name="icon-arrow-right"
+              size={10}
+              color="#a855f7"
+            />
+          </div>
         </div>
       )}
-    </button>
+    </div>
   );
 }
