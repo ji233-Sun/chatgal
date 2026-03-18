@@ -5,9 +5,12 @@
  */
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { ChatBubble, Avatar, Card, Badge } from "arcadeui";
+import { Avatar, Badge } from "arcadeui";
 import StrangerAvatar from "./StrangerAvatar";
 import RevelationEffect from "./RevelationEffect";
+import MessageBubble from "./MessageBubble";
+import TypingIndicator from "./TypingIndicator";
+import ResonanceVisualizer from "./ResonanceVisualizer";
 import PixelIcon from "../ui/PixelIcon";
 import { CARRIAGE_NAMES, CARRIAGE_COLORS } from "@/app/lib/carriage";
 
@@ -194,6 +197,12 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
         ref={scrollRef}
         className="flex-1 overflow-y-auto px-4 py-8 space-y-12 scroll-smooth relative z-10"
       >
+        {/* Resonance Visualizer */}
+        <ResonanceVisualizer
+          score={session.resonanceScore || 0}
+          isActive={messages.length > 5 && !revealComplete}
+        />
+
         <div className="container-responsive space-y-12 pb-24">
           {messages.length === 0 && !isTyping && (
             <div className="text-center py-32 animate-pulse flex flex-col items-center">
@@ -207,66 +216,22 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
           {messages.map((msg, idx) => {
             const isMySide = msg.agentSide === session.mySide;
             const isLast = idx === messages.length - 1;
-            const senderName = isMySide ? "OWNER_AGENT" : (revealComplete ? stranger?.name : "ANON_USER");
 
             return (
-              <div
+              <MessageBubble
                 key={msg.id}
-                className={`flex gap-6 animate-[fade-slide-up_0.5s_ease-out] ${isMySide ? "flex-row-reverse" : "flex-row"}`}
-              >
-                <div className="relative shrink-0">
-                  {isMySide ? (
-                    <div className="relative group">
-                      <div className="absolute -inset-1 bg-purple-500/20 blur-md rounded-lg group-hover:bg-purple-500/40 transition-all" />
-                      <Avatar size="md" shape="square" className="!bg-[#1a1a2e] !border !border-purple-500/30 !shadow-pixel-sm" />
-                      <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-purple-500 border-2 border-[#0F0F23] rounded-sm" />
-                    </div>
-                  ) : (
-                    <div className="relative group">
-                      <div className="absolute -inset-1 bg-rose-500/20 blur-md rounded-lg group-hover:bg-rose-500/40 transition-all" />
-                      <StrangerAvatar revealed={revealComplete} avatarUrl={stranger?.avatarUrl} name={stranger?.name} size="md" />
-                      <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 bg-rose-500 border-2 border-[#0F0F23] rounded-sm" />
-                    </div>
-                  )}
-                </div>
-
-                <div className={`flex flex-col flex-1 max-w-[85%] md:max-w-[75%] ${isMySide ? "items-end" : "items-start"}`}>
-                  <div className={`font-pixel text-[9px] mb-2 flex items-center gap-2 tracking-widest ${isMySide ? "text-purple-400" : "text-rose-400"}`}>
-                    {!isMySide && <div className="w-1.5 h-1.5 bg-current rounded-full" />}
-                    {senderName}
-                    {isMySide && <div className="w-1.5 h-1.5 bg-current rounded-full" />}
-                  </div>
-                  
-                  <ChatBubble
-                    message={msg.content}
-                    isSent={isMySide}
-                    timestamp={new Date(msg.timestamp).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}
-                    className={`
-                      !text-sm !leading-relaxed !p-4 !rounded-xl transition-all duration-300
-                      ${isMySide
-                        ? "!bg-[#1a1a2e]/60 !border !border-purple-500/30 !text-white !rounded-tr-none neon-border-purple"
-                        : "!bg-[#2e1a2e]/60 !border !border-rose-500/30 !text-white !rounded-tl-none neon-border-rose"
-                      }
-                      ${revealComplete && !isMySide ? "!border-amber-500/50 !bg-amber-500/5" : ""}
-                    `}
-                  />
-                </div>
-              </div>
+                content={msg.content}
+                timestamp={new Date(msg.timestamp)}
+                isMySide={isMySide}
+                isRevealed={revealComplete}
+                agentName={isMySide ? "OWNER" : stranger?.name || undefined}
+                agentAvatar={isMySide ? undefined : stranger?.avatarUrl || undefined}
+                isNew={isLast && idx === messages.length - 1}
+              />
             );
           })}
 
-          {isTyping && (
-            <div className="flex gap-6 animate-pulse">
-              <div className="w-10 h-10 rounded-sm bg-white/5 border border-white/10" />
-              <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl rounded-tl-none">
-                <div className="flex gap-1.5 items-center h-full">
-                  <div className="w-1.5 h-1.5 bg-white/20 rounded-full animate-bounce" />
-                  <div className="w-1.5 h-1.5 bg-white/20 rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <div className="w-1.5 h-1.5 bg-white/20 rounded-full animate-bounce [animation-delay:0.4s]" />
-                </div>
-              </div>
-            </div>
-          )}
+          {isTyping && <TypingIndicator isMySide={false} />}
 
           {revealComplete && session.state === "REVEALED" && stranger && (
             <div className="flex justify-center py-10">

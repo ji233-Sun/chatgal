@@ -174,6 +174,28 @@ body {
   100% { opacity: 1; transform: translateY(0); }
 }
 
+/* 消息入场（优化版） */
+@keyframes message-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    filter: blur(4px);
+  }
+  60% {
+    transform: translateY(-2px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* 虚线流动 */
+@keyframes dash {
+  to { stroke-dashoffset: -24; }
+}
+
 /* 通用淡入 */
 @keyframes fade-in {
   0% { opacity: 0; }
