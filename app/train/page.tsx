@@ -32,7 +32,8 @@ export default function TrainStationPage() {
 
       const result = await res.json();
       if (result.code === 0) {
-        router.push(`/train/${result.data.sessionId}`);
+        // 跳转到生活层（第二层）
+        router.push(`/train/life/${result.data.sessionId}?carriage=${selectedCarriage}`);
       } else {
         setError(result.message || "启程失败");
       }

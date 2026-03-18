@@ -60,15 +60,31 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
 
   const loadSession = useCallback(async () => {
     try {
+      // 🔍 调试日志
+      console.log('🔍 ConversationObserver.loadSession');
+      console.log('  sessionId:', sessionId);
+
+      if (!sessionId) {
+        console.warn('⚠️ sessionId 为空，跳过加载');
+        return;
+      }
+
       const res = await fetch(`/api/conversation/${sessionId}`);
       const result = await res.json();
+
+      console.log('  API 响应:', result);
+
       if (result.code === 0) {
         setSession(result.data.session);
         setMessages(result.data.messages);
         if (result.data.stranger) setStranger(result.data.stranger);
         if (result.data.session.state === "REVEALED" && !revealComplete) setShowReveal(true);
+      } else {
+        console.warn('⚠️ API 返回错误:', result.message);
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error('❌ loadSession 失败:', e);
+    }
   }, [sessionId, revealComplete]);
 
   const advance = useCallback(async () => {
