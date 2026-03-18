@@ -79,7 +79,7 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
 
   const advance = useCallback(async () => {
     if (isAdvancingRef.current || !session) return;
-    if (session.state === "REVEALED" || session.state === "FADED_OUT") return;
+    if (session.state === "REVEALED" || session.state === "FADED_OUT" || session.state === "ABANDONED") return;
 
     isAdvancingRef.current = true;
     setIsTyping(true);

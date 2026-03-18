@@ -224,7 +224,7 @@ export async function advanceConversation(
 
   if (!session) throw new Error("Session not found");
 
-  if (session.state === "REVEALED" || session.state === "FADED_OUT") {
+  if (session.state === "REVEALED" || session.state === "FADED_OUT" || session.state === "ABANDONED") {
     throw new Error(`Session already ended: ${session.state}`);
   }
 

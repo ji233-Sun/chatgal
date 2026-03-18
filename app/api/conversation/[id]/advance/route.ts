@@ -35,7 +35,18 @@ export async function POST(
       );
     }
 
-    if (session.userAId !== userId && session.userBId !== userId) {
+    const isUserA = session.userAId === userId;
+    const isUserB = session.userBId === userId;
+
+    if (!isUserA && !isUserB) {
+      return NextResponse.json(
+        { code: 403, message: "无权操作此会话" },
+        { status: 403 },
+      );
+    }
+
+    // userB 只能推进已共鸣的对话
+    if (isUserB && session.state !== "REVEALED") {
       return NextResponse.json(
         { code: 403, message: "无权操作此会话" },
         { status: 403 },
