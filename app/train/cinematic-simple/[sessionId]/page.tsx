@@ -4,9 +4,8 @@
 
 "use client";
 
-import { useEffect, useState } from "next/navigation";
-import { useParams } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 
 export default function SimpleCinematicPage() {
   const params = useParams();

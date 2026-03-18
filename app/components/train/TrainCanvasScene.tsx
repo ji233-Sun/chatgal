@@ -88,7 +88,7 @@ export default function TrainCanvasScene({ sessionId, carriageType }: TrainCanva
         for (const direction of directions) {
           const frame = getFrame(sheet, direction);
           const img = new Image();
-          img.src = frame.dataUrl;
+          img.src = frame.frame1;
           await new Promise<void>((resolve) => {
             img.onload = () => resolve();
           });
@@ -256,7 +256,7 @@ export default function TrainCanvasScene({ sessionId, carriageType }: TrainCanva
 
         return {
           ...agent,
-          status: 'walking',
+          status: 'walking' as const,
           currentWaypointId: nextWaypoint.id,
           targetWaypointId: nextWaypoint.id,
           direction,
@@ -274,7 +274,7 @@ export default function TrainCanvasScene({ sessionId, carriageType }: TrainCanva
         if (agent.id !== agentId) return agent;
         return {
           ...agent,
-          status: 'idle',
+          status: 'idle' as const,
           currentWaypointId: agent.targetWaypointId || agent.currentWaypointId,
           targetWaypointId: null,
         };
@@ -296,7 +296,7 @@ export default function TrainCanvasScene({ sessionId, carriageType }: TrainCanva
         console.log(`💬 相遇: ${agentId} + ${nearbyAgent.id}`);
         return updatedAgents.map((a) => {
           if (a.id === agentId || a.id === nearbyAgent.id) {
-            return { ...a, status: 'conversing' };
+            return { ...a, status: 'conversing' as const };
           }
           return a;
         });

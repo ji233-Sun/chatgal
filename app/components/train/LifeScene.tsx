@@ -51,7 +51,7 @@ export default function LifeScene({ sessionId, carriageType }: LifeSceneProps) {
 
     async function loadSprites() {
       try {
-        const sheet = await loadNPCSpriteSheet(layout.spritePath);
+        const sheet = await loadNPCSpriteSheet(layout!.spritePath);
         setSpriteSheet(sheet);
       } catch (error) {
         console.error('❌ 加载精灵失败:', error);
@@ -165,7 +165,7 @@ export default function LifeScene({ sessionId, carriageType }: LifeSceneProps) {
 
         return {
           ...agent,
-          status: 'walking',
+          status: 'walking' as const,
           direction,
           targetPosition: { x: `${targetX}%`, y: `${targetY}%` },
         };
@@ -180,7 +180,7 @@ export default function LifeScene({ sessionId, carriageType }: LifeSceneProps) {
         if (agent.id !== agentId) return agent;
         return {
           ...agent,
-          status: 'idle',
+          status: 'idle' as const,
           position: agent.targetPosition || agent.position,
           targetPosition: null,
         };
@@ -201,7 +201,7 @@ export default function LifeScene({ sessionId, carriageType }: LifeSceneProps) {
         console.log(`💬 相遇: ${agentId} + ${nearbyAgent.id}`);
         return updatedAgents.map((a) => {
           if (a.id === agentId || a.id === nearbyAgent.id) {
-            return { ...a, status: 'conversing', targetPosition: null };
+            return { ...a, status: 'conversing' as const, targetPosition: null };
           }
           return a;
         });
