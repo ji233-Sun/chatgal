@@ -417,3 +417,37 @@ body {
   80% { transform: skew(0.5deg); }
   100% { transform: skew(0deg); }
 }
+
+/* ===== 揭示层：赛博朋克故障动画 ===== */
+
+/* Glitch Flash - RGB 分离 + 白屏闪烁 */
+@keyframes glitch-flash {
+  0% { }
+  95% { filter: none; }
+  96% {
+    filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='glitch'><feColorMatrix type='matrix' values='1 0 0 0 0  0 1 0 0 0 0 0 1 0 0 0 0 0 0 1'/><feColorMatrix type='matrix' values='1 0 0 0 0  0 0 0 0 0 1 0 0 0 0 0 0 0 1'/><feColorMatrix type='matrix' values='1 0 0 0 0  0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1'/></filter>#glitch");
+  }
+  97% { background: white; }
+  100% { }
+}
+
+/* Glitch Shift - RGB 色彩分离/色差抖动 */
+@keyframes glitch-shift {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(2px, -2px); }
+  60% { transform: translate(-2px, -2px); }
+  80% { transform: translate(2px, 2px); }
+}
+
+/* Stamp In - 印章盖印动画 */
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.5) rotate(-15deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-12deg);
+  }
+}
