@@ -37,7 +37,7 @@ export default function TerminalPage() {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => router.push(`/train/life/${sessionId}`)}
+          onClick={() => router.push('/train')}
           className="!bg-transparent !border-transparent !text-white/40 hover:!text-white/80 !font-pixel !text-[10px] !p-0 transition-colors"
         >
           <PixelIcon name="icon-arrow-left" size={12} color="currentColor" className="mr-2" />

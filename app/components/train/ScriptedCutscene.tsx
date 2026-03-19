@@ -96,7 +96,7 @@ export default function ScriptedCutscene({ sessionId, conversationId }: Scripted
     console.log('  conversationId:', conversationId);
     console.log('  sessionId:', sessionId);
     console.log('  目标 URL:', targetUrl);
-    router.push(targetUrl);
+    router.replace(targetUrl);
   };
 
   if (!spritesLoaded || !spriteSheet) {
