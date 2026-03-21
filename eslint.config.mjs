@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Bundled external project and generated/vendor assets are not part of this app's lint surface.
+    "star-office-ui/**",
   ]),
 ]);
 

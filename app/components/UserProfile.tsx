@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Avatar } from "arcadeui";
 import PixelIcon from "./ui/PixelIcon";
 
 interface UserProfileProps {
@@ -75,10 +76,12 @@ export default function UserProfile({ user }: UserProfileProps) {
           <div className="relative group">
             <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-[#ffd700]/30 to-[#ff8c00]/10 blur-sm group-hover:from-[#ffd700]/50 group-hover:to-[#ff8c00]/20 transition-all duration-500" />
             {user.avatarUrl ? (
-              <img
+              <Avatar
                 src={user.avatarUrl}
                 alt={user.name || "用户头像"}
-                className="relative w-20 h-20 rounded-full border-2 border-[#ffd700]/40 object-cover"
+                fallback={(user.name || "U").charAt(0).toUpperCase()}
+                shape="circle"
+                className="relative !w-20 !h-20 !border-2 !border-[#ffd700]/40 !bg-[#1a1f3a] !object-cover"
               />
             ) : (
               <div className="relative w-20 h-20 rounded-full border-2 border-[#ffd700]/40 bg-[#1a1f3a] flex items-center justify-center">

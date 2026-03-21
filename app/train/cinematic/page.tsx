@@ -4,12 +4,12 @@
 
 "use client";
 
+import { useId } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CinematicIndexPage() {
   const router = useRouter();
-
-  const testSessionId = "test-conversation-" + Date.now();
+  const testSessionId = `test-conversation-${useId().replace(/:/g, "")}`;
 
   return (
     <div className="h-screen w-screen bg-black flex items-center justify-center">

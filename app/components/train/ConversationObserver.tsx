@@ -6,7 +6,6 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Avatar, Badge } from "arcadeui";
-import StrangerAvatar from "./StrangerAvatar";
 import RevelationEffect from "./RevelationEffect";
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
@@ -127,7 +126,9 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
       } else {
         setIsTyping(false);
       }
-    } catch (e) { setIsTyping(false); } finally { isAdvancingRef.current = false; }
+    } catch {
+      setIsTyping(false);
+    } finally { isAdvancingRef.current = false; }
   }, [session, sessionId, loadSession]);
 
   const handleAbandon = useCallback(async () => {
@@ -206,7 +207,7 @@ export default function ConversationObserver({ sessionId }: ConversationObserver
                 </div>
               )}
               <div className="font-pixel text-[8px] text-white/20 mt-1 uppercase tracking-widest">
-                ID: {sessionId.slice(0, 8)} // PASSIVE_OBSERVATION
+                ID: {sessionId.slice(0, 8)} {"// PASSIVE_OBSERVATION"}
               </div>
             </div>
           </div>

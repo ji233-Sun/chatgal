@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "arcadeui";
 import LoginButton from "./components/LoginButton";
@@ -130,19 +131,19 @@ export default function Home() {
                 </div>
                 <div className="shrink-0 flex items-center gap-3">
                   {activeCount > 1 && (
-                    <a
+                    <Link
                       href="/train/history"
                       className="font-pixel text-[8px] text-white/30 hover:text-white/50 transition-colors"
                     >
                       查看全部 →
-                    </a>
+                    </Link>
                   )}
-                  <a
+                  <Link
                     href={`/train/${activeSession.id}`}
                     className="font-pixel text-[10px] text-[#0A0E27] bg-purple-500 hover:bg-purple-400 px-3 py-1.5 rounded-sm transition-colors"
                   >
                     继续观测
-                  </a>
+                  </Link>
                 </div>
               </div>
             )}
@@ -196,12 +197,12 @@ export default function Home() {
                     </Button>
                   </div>
 
-                  <a
+                  <Link
                     href="/train/history"
                     className="mt-4 font-pixel text-xs text-white/40 hover:text-[#ffd700] transition-colors"
                   >
                     旅途日志 →
-                  </a>
+                  </Link>
 
                   <div className="mt-6 flex gap-4 opacity-30 group-hover:opacity-60 transition-opacity">
                     <PixelIcon name="icon-scope" size={20} color="currentColor" />

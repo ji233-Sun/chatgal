@@ -66,14 +66,6 @@ interface CarriageSelectorProps {
   loading?: boolean;
 }
 
-// 颜文字库
-const EMOTES: Record<string, string[]> = {
-  joy: ["(^_^)", "(^o^)", "(*^-^*)", "(>v<)"],
-  thinking: ["(._. )", "(?.?)", "(*^_^*)", "(•ิ_•ิ)"],
-  surprised: ["(o.o;)", "(!?)", "(O_O;)", "(⊙_⊙)"],
-  cool: ["(-_-)", "(~_^)", "(-v-)", "(▀̿Ĺ̯▀̿ ̿)"],
-};
-
 export default function CarriageSelector({
   selected,
   onSelect,

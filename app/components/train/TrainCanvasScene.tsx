@@ -34,7 +34,7 @@ interface TrainCanvasSceneProps {
 
 const MOVE_DURATION = 3000;
 
-export default function TrainCanvasScene({ sessionId, carriageType }: TrainCanvasSceneProps) {
+export default function TrainCanvasScene({}: TrainCanvasSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const router = useRouter();
 
@@ -145,6 +145,70 @@ export default function TrainCanvasScene({ sessionId, carriageType }: TrainCanva
     init();
   }, []);
 
+  const startWalking = useCallback((agentId: string) => {
+    setAgents((prev) =>
+      prev.map((agent) => {
+        if (agent.id !== agentId || agent.status !== 'idle') return agent;
+
+        const currentWaypointIndex = TRAIN_LAYOUT.aisleWaypoints.findIndex(
+          (wp) => wp.id === agent.currentWaypointId
+        );
+
+        const availableWaypoints = TRAIN_LAYOUT.aisleWaypoints.filter(
+          (_wp, idx) => idx !== currentWaypointIndex
+        );
+        const nextWaypoint =
+          availableWaypoints[Math.floor(Math.random() * availableWaypoints.length)];
+
+        const direction: 'left' | 'right' = nextWaypoint.x > agent.x ? 'right' : 'left';
+
+        return {
+          ...agent,
+          status: 'walking' as const,
+          currentWaypointId: nextWaypoint.id,
+          targetWaypointId: nextWaypoint.id,
+          direction,
+          x: nextWaypoint.x,
+          y: nextWaypoint.y,
+        };
+      })
+    );
+  }, []);
+
+  const handleMovementComplete = useCallback((agentId: string) => {
+    setAgents((prev) => {
+      const updatedAgents = prev.map((agent) => {
+        if (agent.id !== agentId) return agent;
+        return {
+          ...agent,
+          status: 'idle' as const,
+          currentWaypointId: agent.targetWaypointId || agent.currentWaypointId,
+          targetWaypointId: null,
+        };
+      });
+
+      const currentAgent = updatedAgents.find((a) => a.id === agentId);
+      if (!currentAgent) return updatedAgents;
+
+      const nearbyAgent = updatedAgents.find((a) => {
+        if (a.id === agentId || a.status === 'conversing') return false;
+        return a.currentWaypointId === currentAgent.currentWaypointId;
+      });
+
+      if (nearbyAgent) {
+        console.log(`💬 相遇: ${agentId} + ${nearbyAgent.id}`);
+        return updatedAgents.map((a) => {
+          if (a.id === agentId || a.id === nearbyAgent.id) {
+            return { ...a, status: 'conversing' as const };
+          }
+          return a;
+        });
+      }
+
+      return updatedAgents;
+    });
+  }, []);
+
   // 🎯 Canvas 渲染循环
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -233,78 +297,7 @@ export default function TrainCanvasScene({ sessionId, carriageType }: TrainCanva
     return () => {
       timers.forEach(clearTimeout);
     };
-  }, [agents]);
-
-  // 水平移动
-  const startWalking = useCallback((agentId: string) => {
-    setAgents((prev) =>
-      prev.map((agent) => {
-        if (agent.id !== agentId || agent.status !== 'idle') return agent;
-
-        const currentWaypointIndex = TRAIN_LAYOUT.aisleWaypoints.findIndex(
-          wp => wp.id === agent.currentWaypointId
-        );
-
-        const availableWaypoints = TRAIN_LAYOUT.aisleWaypoints.filter(
-          (wp, idx) => idx !== currentWaypointIndex
-        );
-        const nextWaypoint = availableWaypoints[
-          Math.floor(Math.random() * availableWaypoints.length)
-        ];
-
-        const direction: 'left' | 'right' = nextWaypoint.x > agent.x ? 'right' : 'left';
-
-        return {
-          ...agent,
-          status: 'walking' as const,
-          currentWaypointId: nextWaypoint.id,
-          targetWaypointId: nextWaypoint.id,
-          direction,
-          x: nextWaypoint.x,
-          y: nextWaypoint.y, // Y 轴固定
-        };
-      })
-    );
-  }, []);
-
-  // 移动完成检测
-  const handleMovementComplete = useCallback((agentId: string) => {
-    setAgents((prev) => {
-      const updatedAgents = prev.map((agent) => {
-        if (agent.id !== agentId) return agent;
-        return {
-          ...agent,
-          status: 'idle' as const,
-          currentWaypointId: agent.targetWaypointId || agent.currentWaypointId,
-          targetWaypointId: null,
-        };
-      });
-
-      // 相遇检测
-      const currentAgent = updatedAgents.find((a) => a.id === agentId);
-      if (!currentAgent) return updatedAgents;
-
-      const nearbyAgent = updatedAgents.find((a) => {
-        if (a.id === agentId || a.status === 'conversing') return false;
-        return (
-          a.currentWaypointId === currentAgent.currentWaypointId &&
-          a.currentWaypointId !== null
-        );
-      });
-
-      if (nearbyAgent) {
-        console.log(`💬 相遇: ${agentId} + ${nearbyAgent.id}`);
-        return updatedAgents.map((a) => {
-          if (a.id === agentId || a.id === nearbyAgent.id) {
-            return { ...a, status: 'conversing' as const };
-          }
-          return a;
-        });
-      }
-
-      return updatedAgents;
-    });
-  }, []);
+  }, [agents, handleMovementComplete, startWalking]);
 
   // Canvas 点击事件
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {

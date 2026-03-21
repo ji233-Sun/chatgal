@@ -9,6 +9,7 @@
 
 "use client";
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { SpriteSheet, getFrame } from '@/app/lib/sprite-processor';
 
@@ -71,19 +72,25 @@ export default function AgentSprite({ agent, spriteSheet }: AgentSpriteProps) {
           style={{ minWidth: '32px', minHeight: '32px' }}
           onClick={handleBubbleClick}
         >
-          <img
+          <Image
             src="/Train Example/assets/emotes/question.png"
             alt="对话中"
             className="w-6 h-6 animate-bounce"
+            unoptimized
+            width={24}
+            height={24}
             style={{ imageRendering: 'pixelated' }}
           />
         </button>
       )}
 
       {/* 人物精灵 */}
-      <img
+      <Image
         src={currentFrame.dataUrl}
         alt={agent.name}
+        unoptimized
+        width={32}
+        height={32}
         style={{
           width: '32px',
           height: '32px',

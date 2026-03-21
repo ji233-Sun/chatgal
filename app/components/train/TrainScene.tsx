@@ -9,7 +9,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import AgentSprite, { AgentState } from './AgentSprite';
 import { loadNPCSpriteSheet, SpriteSheet } from '@/app/lib/sprite-processor';
 import trainLayout from '@/app/lib/train-layout.json';
@@ -19,15 +19,56 @@ interface TrainLayout {
   spritePath: string;
 }
 
+const STATIC_LAYOUT = trainLayout as TrainLayout;
+const MOCK_AGENTS: AgentState[] = [
+  {
+    id: 'agent_1',
+    name: 'Stranger A',
+    isPlayer: true,
+    status: 'idle',
+    position: { x: '20%', y: '60%' },
+    direction: 'right',
+    targetPosition: null,
+    conversingWith: null,
+  },
+  {
+    id: 'agent_2',
+    name: 'Stranger B',
+    isPlayer: false,
+    status: 'conversing',
+    position: { x: '40%', y: '60%' },
+    direction: 'left',
+    targetPosition: null,
+    conversingWith: 'agent_1',
+  },
+  {
+    id: 'agent_3',
+    name: 'Stranger C',
+    isPlayer: false,
+    status: 'idle',
+    position: { x: '60%', y: '60%' },
+    direction: 'down',
+    targetPosition: null,
+    conversingWith: null,
+  },
+  {
+    id: 'agent_4',
+    name: 'Stranger D',
+    isPlayer: false,
+    status: 'idle',
+    position: { x: '80%', y: '60%' },
+    direction: 'left',
+    targetPosition: null,
+    conversingWith: null,
+  },
+];
+
 export default function TrainScene() {
-  const [agents, setAgents] = useState<AgentState[]>([]);
-  const [layout, setLayout] = useState<TrainLayout | null>(null);
+  const [agents, setAgents] = useState<AgentState[]>(MOCK_AGENTS);
+  const [layout] = useState<TrainLayout>(STATIC_LAYOUT);
   const [spriteSheet, setSpriteSheet] = useState<SpriteSheet | null>(null);
 
   useEffect(() => {
-    setLayout(trainLayout as TrainLayout);
-
-    // 加载精灵表
     async function loadSprites() {
       try {
         const sheet = await loadNPCSpriteSheet(trainLayout.spritePath);
@@ -37,52 +78,6 @@ export default function TrainScene() {
       }
     }
     loadSprites();
-
-    // 初始化 Mock Agents
-    const mockAgents: AgentState[] = [
-      {
-        id: 'agent_1',
-        name: 'Stranger A',
-        isPlayer: true,
-        status: 'idle',
-        position: { x: '20%', y: '60%' },
-        direction: 'right',
-        targetPosition: null,
-        conversingWith: null,
-      },
-      {
-        id: 'agent_2',
-        name: 'Stranger B',
-        isPlayer: false,
-        status: 'conversing',
-        position: { x: '40%', y: '60%' },
-        direction: 'left',
-        targetPosition: null,
-        conversingWith: 'agent_1',
-      },
-      {
-        id: 'agent_3',
-        name: 'Stranger C',
-        isPlayer: false,
-        status: 'idle',
-        position: { x: '60%', y: '60%' },
-        direction: 'down',
-        targetPosition: null,
-        conversingWith: null,
-      },
-      {
-        id: 'agent_4',
-        name: 'Stranger D',
-        isPlayer: false,
-        status: 'idle',
-        position: { x: '80%', y: '60%' },
-        direction: 'left',
-        targetPosition: null,
-        conversingWith: null,
-      },
-    ];
-
-    setAgents(mockAgents);
 
     // 模拟状态变化（演示用）
     const interval = setInterval(() => {
@@ -96,16 +91,6 @@ export default function TrainScene() {
 
     return () => clearInterval(interval);
   }, []);
-
-  if (!layout) {
-    return (
-      <div className="h-full flex items-center justify-center bg-[#0F0F23]">
-        <div className="font-pixel text-xs text-rose-500 animate-pulse">
-          LOADING_TRAIN_LAYOUT...
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="relative w-full h-full bg-[#0F0F23] overflow-hidden">

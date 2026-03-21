@@ -8,6 +8,7 @@
 
 "use client";
 
+import Image from 'next/image';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { TRAIN_LAYOUT } from '@/app/lib/train-layout';
@@ -117,17 +118,23 @@ export default function ScriptedCutscene({ sessionId, conversationId }: Scripted
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-black">
-      <img
+      <Image
         src={TRAIN_LAYOUT.assets.background}
         alt="train background"
         className="absolute inset-0 w-full h-full object-cover"
+        unoptimized
+        fill
+        sizes="100vw"
         style={{ imageRendering: 'pixelated', zIndex: 0 }}
       />
 
-      <img
+      <Image
         src={srcA}
         alt="Agent A"
         className="absolute"
+        unoptimized
+        width={64}
+        height={64}
         style={{
           top: '65%',
           left: agentAPos,
@@ -139,10 +146,13 @@ export default function ScriptedCutscene({ sessionId, conversationId }: Scripted
         }}
       />
 
-      <img
+      <Image
         src={srcB}
         alt="Agent B"
         className="absolute"
+        unoptimized
+        width={64}
+        height={64}
         style={{
           top: '65%',
           left: agentBPos,

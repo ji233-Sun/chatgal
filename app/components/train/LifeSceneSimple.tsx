@@ -4,7 +4,6 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
 import trainLayout from '@/app/lib/train-layout.json';
 
 interface TrainLayout {
@@ -19,25 +18,7 @@ interface LifeSceneSimpleProps {
 }
 
 export default function LifeSceneSimple({ sessionId, carriageType }: LifeSceneSimpleProps) {
-  const [layout, setLayout] = useState<TrainLayout | null>(null);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    console.log('🚀 LifeSceneSimple mounted');
-    setLayout(trainLayout as TrainLayout);
-    setLoaded(true);
-    console.log('✅ Layout loaded:', trainLayout);
-  }, []);
-
-  if (!layout || !loaded) {
-    return (
-      <div className="h-full flex items-center justify-center bg-[#0F0F23]">
-        <div className="font-pixel text-xs text-rose-500 animate-pulse">
-          LOADING_TRAIN_LAYOUT...
-        </div>
-      </div>
-    );
-  }
+  const layout = trainLayout as TrainLayout;
 
   return (
     <div className="relative w-full h-full bg-[#0F0F23] overflow-hidden">

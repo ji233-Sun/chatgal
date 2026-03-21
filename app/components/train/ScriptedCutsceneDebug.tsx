@@ -12,7 +12,7 @@ interface ScriptedCutsceneDebugProps {
   conversationId: string;
 }
 
-export default function ScriptedCutsceneDebug({ sessionId, conversationId }: ScriptedCutsceneDebugProps) {
+export default function ScriptedCutsceneDebug({ conversationId }: ScriptedCutsceneDebugProps) {
   const router = useRouter();
   const [phase, setPhase] = useState<'moving' | 'met' | 'bubble'>('moving');
   const [showBubble, setShowBubble] = useState(false);

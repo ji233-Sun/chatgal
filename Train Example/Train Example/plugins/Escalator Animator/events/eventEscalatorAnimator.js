@@ -63,7 +63,7 @@ export const fields = [].concat(
 
 export const compile = (input, helpers) => {
     const { _addComment, appendRaw, ifVariableValue,
-      ifVariableCompare, variableValueOperation, variableSetToValue, ifExpression} = helpers;
+      variableValueOperation, variableSetToValue } = helpers;
     const { top_left_x, top_left_y, current_frame, source_name } = input;
     _addComment("Escalator Update");
     ifVariableValue(current_frame, ".EQ", 0, () => {

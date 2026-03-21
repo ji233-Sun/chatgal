@@ -115,9 +115,8 @@ export const fields = [].concat(
 
 export const compile = (input, helpers) => {
     const { _addComment, appendRaw, ifVariableValue,
-      ifVariableCompare, variableValueOperation, variableSetToValue, ifExpression} = helpers;
-    const { nose_tip_x, nose_tip_y, is_bullet_train, is_travel_left,
-        loop_time, visible_min, visible_max, current_frame, source_name } = input;
+      variableValueOperation, variableSetToValue } = helpers;
+    const { is_bullet_train, current_frame, source_name } = input;
     _addComment("Train Update");
     // If they picked the bullet train...
     if(is_bullet_train)

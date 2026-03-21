@@ -34,24 +34,50 @@ const WALKABLE_ZONE = {
 };
 
 const MOVE_DURATION = 3000;
+const STATIC_LAYOUT = trainLayout as TrainLayout;
+const INITIAL_AGENTS: AgentState[] = [
+  {
+    id: 'agent_1',
+    name: 'Player',
+    isPlayer: true,
+    status: 'idle',
+    position: { x: '40%', y: '70%' },
+    direction: 'down',
+    targetPosition: null,
+    conversingWith: null,
+  },
+  {
+    id: 'agent_2',
+    name: 'Stranger A',
+    isPlayer: false,
+    status: 'idle',
+    position: { x: '50%', y: '70%' },
+    direction: 'down',
+    targetPosition: null,
+    conversingWith: null,
+  },
+  {
+    id: 'agent_3',
+    name: 'Stranger B',
+    isPlayer: false,
+    status: 'idle',
+    position: { x: '60%', y: '70%' },
+    direction: 'down',
+    targetPosition: null,
+    conversingWith: null,
+  },
+];
 
-export default function LifeScene({ sessionId, carriageType }: LifeSceneProps) {
-  const [layout, setLayout] = useState<TrainLayout | null>(null);
+export default function LifeScene({}: LifeSceneProps) {
+  const [layout] = useState<TrainLayout>(STATIC_LAYOUT);
   const [spriteSheet, setSpriteSheet] = useState<SpriteSheet | null>(null);
-  const [agents, setAgents] = useState<AgentState[]>([]);
-
-  // 加载布局
-  useEffect(() => {
-    setLayout(trainLayout as TrainLayout);
-  }, []);
+  const [agents, setAgents] = useState<AgentState[]>(INITIAL_AGENTS);
 
   // 加载精灵表和初始化 Agents
   useEffect(() => {
-    if (!layout) return;
-
     async function loadSprites() {
       try {
-        const sheet = await loadNPCSpriteSheet(layout!.spritePath);
+        const sheet = await loadNPCSpriteSheet(layout.spritePath);
         setSpriteSheet(sheet);
       } catch (error) {
         console.error('❌ 加载精灵失败:', error);
@@ -59,78 +85,7 @@ export default function LifeScene({ sessionId, carriageType }: LifeSceneProps) {
     }
 
     loadSprites();
-
-    // 初始化 Agents（在过道内）
-    const initialAgents: AgentState[] = [
-      {
-        id: 'agent_1',
-        name: 'Player',
-        isPlayer: true,
-        status: 'idle',
-        position: { x: '40%', y: '70%' },
-        direction: 'down',
-        targetPosition: null,
-        conversingWith: null,
-      },
-      {
-        id: 'agent_2',
-        name: 'Stranger A',
-        isPlayer: false,
-        status: 'idle',
-        position: { x: '50%', y: '70%' },
-        direction: 'down',
-        targetPosition: null,
-        conversingWith: null,
-      },
-      {
-        id: 'agent_3',
-        name: 'Stranger B',
-        isPlayer: false,
-        status: 'idle',
-        position: { x: '60%', y: '70%' },
-        direction: 'down',
-        targetPosition: null,
-        conversingWith: null,
-      },
-    ];
-
-    setAgents(initialAgents);
   }, [layout]);
-
-  // 🎯 核心：状态机（完全锁定 conversing）
-  useEffect(() => {
-    if (!layout) return;
-
-    const timers: NodeJS.Timeout[] = [];
-
-    agents.forEach((agent) => {
-      // 🎯 conversing 状态：完全静止，不参与任何逻辑
-      if (agent.status === 'conversing') {
-        return;
-      }
-
-      // idle 状态
-      if (agent.status === 'idle') {
-        const waitTime = Math.random() * 3000 + 2000;
-        const timer = setTimeout(() => {
-          startWalking(agent.id);
-        }, waitTime);
-        timers.push(timer);
-      }
-
-      // walking 状态
-      if (agent.status === 'walking') {
-        const timer = setTimeout(() => {
-          handleMovementComplete(agent.id);
-        }, MOVE_DURATION);
-        timers.push(timer);
-      }
-    });
-
-    return () => {
-      timers.forEach(clearTimeout);
-    };
-  }, [agents, layout]);
 
   // 🎯 轴向移动
   const startWalking = useCallback((agentId: string) => {
@@ -140,22 +95,17 @@ export default function LifeScene({ sessionId, carriageType }: LifeSceneProps) {
 
         const currentX = parseFloat(agent.position.x);
         const currentY = parseFloat(agent.position.y);
-
-        // 🎯 轴向移动：只改变 X 或 Y
         const axis = Math.random() > 0.5 ? 'x' : 'y';
 
         let targetX = currentX;
         let targetY = currentY;
 
         if (axis === 'x') {
-          // 只改变 X 轴（在过道内）
           targetX = WALKABLE_ZONE.minX + Math.random() * (WALKABLE_ZONE.maxX - WALKABLE_ZONE.minX);
         } else {
-          // 只改变 Y 轴（在过道内）
           targetY = WALKABLE_ZONE.minY + Math.random() * (WALKABLE_ZONE.maxY - WALKABLE_ZONE.minY);
         }
 
-        // 计算方向
         let direction: Direction = 'down';
         if (axis === 'x') {
           direction = targetX > currentX ? 'right' : 'left';
@@ -186,7 +136,6 @@ export default function LifeScene({ sessionId, carriageType }: LifeSceneProps) {
         };
       });
 
-      // 相遇检测
       const currentAgent = updatedAgents.find((a) => a.id === agentId);
       if (!currentAgent) return updatedAgents;
 
@@ -211,15 +160,38 @@ export default function LifeScene({ sessionId, carriageType }: LifeSceneProps) {
     });
   }, []);
 
-  if (!layout) {
-    return (
-      <div className="h-full w-full flex items-center justify-center bg-black">
-        <div className="font-pixel text-xs text-green-400 animate-pulse">
-          LOADING...
-        </div>
-      </div>
-    );
-  }
+  // 🎯 核心：状态机（完全锁定 conversing）
+  useEffect(() => {
+    const timers: NodeJS.Timeout[] = [];
+
+    agents.forEach((agent) => {
+      // 🎯 conversing 状态：完全静止，不参与任何逻辑
+      if (agent.status === 'conversing') {
+        return;
+      }
+
+      // idle 状态
+      if (agent.status === 'idle') {
+        const waitTime = Math.random() * 3000 + 2000;
+        const timer = setTimeout(() => {
+          startWalking(agent.id);
+        }, waitTime);
+        timers.push(timer);
+      }
+
+      // walking 状态
+      if (agent.status === 'walking') {
+        const timer = setTimeout(() => {
+          handleMovementComplete(agent.id);
+        }, MOVE_DURATION);
+        timers.push(timer);
+      }
+    });
+
+    return () => {
+      timers.forEach(clearTimeout);
+    };
+  }, [agents, handleMovementComplete, startWalking]);
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">

@@ -65,7 +65,9 @@ export default function RevelationEffect({
   resonanceScore,
   onComplete,
 }: RevelationEffectProps) {
-  const [phase, setPhase] = useState<"idle" | "glow" | "burst" | "reveal" | "done">("idle");
+  const [phase, setPhase] = useState<"idle" | "glow" | "burst" | "reveal" | "done">(
+    active ? "glow" : "idle"
+  );
 
   const motes = useMemo(() => generateMotes(24), []);
   const fragments = useMemo(() => generateFragments(16), []);
@@ -79,11 +81,17 @@ export default function RevelationEffect({
 
   useEffect(() => {
     if (!active) return;
-    setPhase("glow");
+
+    const start = setTimeout(() => setPhase("glow"), 0);
     const t1 = setTimeout(() => setPhase("burst"), 1800);
     const t2 = setTimeout(() => setPhase("reveal"), 2600);
     const t3 = setTimeout(() => setPhase("done"), 4600);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    return () => {
+      clearTimeout(start);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   }, [active]);
 
   if (phase === "idle") return null;

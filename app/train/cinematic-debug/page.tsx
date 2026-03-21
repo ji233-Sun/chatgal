@@ -4,17 +4,21 @@
 
 "use client";
 
+import { useId } from "react";
 import { useRouter } from "next/navigation";
 import ScriptedCutsceneDebug from "@/app/components/train/ScriptedCutsceneDebug";
 
 export default function CinematicDebugPage() {
   const router = useRouter();
-  const testSessionId = "debug-conversation-" + Date.now();
+  const testSessionId = `debug-conversation-${useId().replace(/:/g, "")}`;
 
   return (
     <div className="relative h-screen w-screen bg-black">
       {/* 🎬 调试版过场动画 */}
-      <ScriptedCutsceneDebug sessionId={testSessionId} conversationId={testSessionId} />
+      <ScriptedCutsceneDebug
+        sessionId={testSessionId}
+        conversationId={testSessionId}
+      />
 
       {/* 🎬 退出按钮 */}
       <button
